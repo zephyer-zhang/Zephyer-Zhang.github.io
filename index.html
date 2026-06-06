@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zephyr - AI爱好者 | 软件工程技术</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <div class="logo">ZEPH<span>YR</span></div>
+            <ul class="nav-links">
+                <li><a href="#home">首页</a></li>
+                <li><a href="#about">关于我</a></li>
+                <li><a href="#skills">技能</a></li>
+                <li><a href="#portfolio">作品集</a></li>
+                <li><a href="#blog">博客</a></li>
+                <li><a href="#contact">联系</a></li>
+            </ul>
+            <div class="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 首页 Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="glitch" data-text="Zephyr">Zephyr</h1>
+                <p class="subtitle">软件工程技术 · AI探险家 · 代码艺术家</p>
+                <p class="description">
+                    「用代码写诗，用AI作画」
+                </p>
+                <div class="hero-buttons">
+                    <a href="#portfolio" class="btn btn-primary">查看作品</a>
+                    <a href="#" class="btn btn-secondary" id="download-resume">下载简历</a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="tech-circle">
+                    <div class="circle-ring"></div>
+                    <div class="circle-ring"></div>
+                    <div class="circle-ring"></div>
+                    <i class="fas fa-code"></i>
+                </div>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <i class="fas fa-chevron-down"></i>
+        </div>
+    </section>
+
+    <!-- 关于我（含加密信息） -->
+    <section id="about" class="section">
+        <div class="container">
+            <h2 class="section-title">关于我</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <!-- 公开信息 -->
+                    <p>
+                        你好！我是 <span class="highlight">Zephyr</span>，
+                        一名热爱技术的<span class="highlight">软件工程</span>专业学生。
+                    </p>
+                    <p>
+                        我热爱<span class="highlight">人工智能</span>和<span class="highlight">软件开发</span>，正在探索RAGFlow等前沿技术的部署与应用。
+                    </p>
+                    <p>
+                        作为一名学生，我始终保持学习的热情，不断提升自己的编程能力和技术视野。
+                    </p>
+
+                    <!-- 加密信息区块 -->
+                    <div class="encrypted-section" id="encryptedSection">
+                        <div class="encrypted-header" id="decryptBtn">
+                            <i class="fas fa-lock" id="lockIcon"></i>
+                            <span id="decryptLabel">🔒 点击解密隐藏信息</span>
+                            <i class="fas fa-chevron-right arrow" id="arrowIcon"></i>
+                        </div>
+                        <div class="encrypted-body" id="encryptedBody">
+                            <!-- 密码输入界面 -->
+                            <div class="password-screen" id="passwordScreen">
+                                <div class="password-icon">
+                                    <i class="fas fa-user-shield"></i>
+                                </div>
+                                <h3>请输入访问密码</h3>
+                                <p class="password-hint">此区域包含个人隐私信息，仅本人可查看</p>
+                                <div class="password-input-wrap">
+                                    <input type="password" id="passwordInput" placeholder="输入密码..." autocomplete="off">
+                                    <button id="passwordSubmit" class="password-btn">
+                                        <i class="fas fa-arrow-right"></i>
+                                    </button>
+                                </div>
+                                <p class="password-error" id="passwordError"></p>
+                                <div class="password-attempts" id="attemptsInfo"></div>
+                            </div>
+
+                            <!-- 解密动画 -->
+                            <div class="decrypt-animation" id="decryptAnim" style="display:none;">
+                                <div class="matrix-text" id="matrixText"></div>
+                                <div class="decrypt-progress">
+                                    <div class="progress-bar" id="progressBar"></div>
+                                </div>
+                                <p class="decrypt-hint" id="decryptHint">正在解密...</p>
+                            </div>
+
+                            <!-- 真实信息 -->
+                            <div class="real-info" id="realInfo" style="display:none;">
+                                <h3>🔓 已解密信息</h3>
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <i class="fas fa-user"></i>
+                                        <div>
+                                            <strong>真实姓名</strong>
+                                            <p>张宇恒</p>
+                                        </div>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-school"></i>
+                                        <div>
+                                            <strong>学校</strong>
+                                            <p>海南科技大学信息工程学院</p>
+                                        </div>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-graduation-cap"></i>
+                                        <div>
+                                            <strong>专业</strong>
+                                            <p>软件工程技术</p>
+                                        </div>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-calendar"></i>
+                                        <div>
+                                            <strong>年级</strong>
+                                            <p>大一（2025级）</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="decrypt-note">⚠️ 此信息仅本人可见，请勿外传</p>
+                                <button class="btn btn-secondary" id="lockAgainBtn" style="margin-top:15px;">
+                                    <i class="fas fa-lock"></i> 重新锁定
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="about-stats">
+                        <div class="stat">
+                            <span class="stat-number" data-target="1">0</span>
+                            <span class="stat-label">年经验</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number" data-target="5">0</span>
+                            <span class="stat-label">完成项目</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number" data-target="10">0</span>
+                            <span class="stat-label">技术栈</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-image">
+                    <img src="avatar.webp" alt="Zephyr - 头像" class="about-avatar">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 技能 -->
+    <section id="skills" class="section section-dark">
+        <div class="container">
+            <h2 class="section-title">我的技能</h2>
+            <div class="skills-grid">
+                <div class="skill-card">
+                    <i class="fas fa-code"></i>
+                    <h3>编程语言</h3>
+                    <p>Python, JavaScript, HTML/CSS</p>
+                    <div class="skill-tags">
+                        <span>Python</span>
+                        <span>JavaScript</span>
+                        <span>HTML5</span>
+                        <span>CSS3</span>
+                    </div>
+                </div>
+                <div class="skill-card">
+                    <i class="fas fa-server"></i>
+                    <h3>开发工具</h3>
+                    <p>Git, Docker, VS Code</p>
+                    <div class="skill-tags">
+                        <span>Git</span>
+                        <span>Docker</span>
+                        <span>VS Code</span>
+                        <span>学习中</span>
+                    </div>
+                </div>
+                <div class="skill-card">
+                    <i class="fas fa-brain"></i>
+                    <h3>AI技术</h3>
+                    <p>RAGFlow, 机器学习基础</p>
+                    <div class="skill-tags">
+                        <span>RAGFlow</span>
+                        <span>AI部署</span>
+                        <span>探索中</span>
+                    </div>
+                </div>
+                <div class="skill-card">
+                    <i class="fas fa-laptop-code"></i>
+                    <h3>其他技能</h3>
+                    <p>文档编写, 技术博客</p>
+                    <div class="skill-tags">
+                        <span>Markdown</span>
+                        <span>技术写作</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 作品集 -->
+    <section id="portfolio" class="section">
+        <div class="container">
+            <h2 class="section-title">作品集</h2>
+            <p class="section-subtitle">以下是我完成的项目，更多作品持续更新中...</p>
+            <div class="portfolio-grid">
+                <div class="portfolio-item">
+                    <div class="portfolio-image">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <div class="portfolio-info">
+                        <h3>个人网站</h3>
+                        <p>暗黑科技风格响应式个人主页，含作品集/博客/简历</p>
+                        <div class="portfolio-tags">
+                            <span>HTML/CSS</span>
+                            <span>JavaScript</span>
+                            <span>响应式</span>
+                        </div>
+                        <a href="#" class="portfolio-link">查看详情 →</a>
+                    </div>
+                </div>
+                <div class="portfolio-item">
+                    <div class="portfolio-image">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="portfolio-info">
+                        <h3>RAG知识库系统</h3>
+                        <p>基于RAGFlow的本地AI知识库系统，支持课程文档问答</p>
+                        <div class="portfolio-tags">
+                            <span>Docker</span>
+                            <span>AI</span>
+                            <span>RAG</span>
+                        </div>
+                        <a href="#" class="portfolio-link">查看详情 →</a>
+                    </div>
+                </div>
+                <div class="portfolio-item">
+                    <div class="portfolio-image">
+                        <i class="fas fa-message"></i>
+                    </div>
+                    <div class="portfolio-info">
+                        <h3>AI答辩模拟助手</h3>
+                        <p>AI驱动的答辩练习系统，模拟老师与学生对话场景</p>
+                        <div class="portfolio-tags">
+                            <span>Python</span>
+                            <span>AI</span>
+                            <span>语音交互</span>
+                        </div>
+                        <a href="#" class="portfolio-link">即将推出 →</a>
+                    </div>
+                </div>
+                <div class="portfolio-item">
+                    <div class="portfolio-image">
+                        <i class="fas fa-gamepad"></i>
+                    </div>
+                    <div class="portfolio-info">
+                        <h3>经典小游戏合集</h3>
+                        <p>贪吃蛇/2048/扫雷等经典游戏的Web实现</p>
+                        <div class="portfolio-tags">
+                            <span>JavaScript</span>
+                            <span>Canvas</span>
+                            <span>进行中</span>
+                        </div>
+                        <a href="#" class="portfolio-link">即将推出 →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 博客 -->
+    <section id="blog" class="section section-dark">
+        <div class="container">
+            <h2 class="section-title">技术博客</h2>
+            <p class="section-subtitle">分享我的学习心得和技术探索...</p>
+            <div class="blog-grid">
+                <article class="blog-card">
+                    <div class="blog-date">
+                        <span class="day">06</span>
+                        <span class="month">6月</span>
+                    </div>
+                    <h3>RAGFlow本地部署指南</h3>
+                    <p>记录RAGFlow在Windows下的Docker部署过程，包括环境配置、镜像下载、常见问题解决...</p>
+                    <a href="#" class="blog-link">阅读全文 →</a>
+                </article>
+                <article class="blog-card">
+                    <div class="blog-date">
+                        <span class="day">01</span>
+                        <span class="month">6月</span>
+                    </div>
+                    <h3>大一学子的编程学习路线</h3>
+                    <p>分享我作为软件工程技术专业学生的编程学习经验和技术栈选择...</p>
+                    <a href="#" class="blog-link">阅读全文 →</a>
+                </article>
+                <article class="blog-card">
+                    <div class="blog-date">
+                        <span class="day">待定</span>
+                        <span class="month">未来</span>
+                    </div>
+                    <h3>更多文章即将发布...</h3>
+                    <p>持续学习中，更多技术心得和项目总结将在这里分享...</p>
+                    <a href="#" class="blog-link">敬请期待 →</a>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- 联系 -->
+    <section id="contact" class="section">
+        <div class="container">
+            <h2 class="section-title">联系我</h2>
+            <p class="section-subtitle">如果你对我的项目感兴趣，或者想交流技术，欢迎联系！</p>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <h4>位置</h4>
+                            <p>海南科技大学</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-graduation-cap"></i>
+                        <div>
+                            <h4>学校</h4>
+                            <p>信息工程学院 - 软件工程技术</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <h4>邮箱</h4>
+                            <p>暂不公开（需要时可通过表单联系）</p>
+                        </div>
+                    </div>
+                </div>
+                <form class="contact-form">
+                    <h3>发送消息</h3>
+                    <input type="text" placeholder="你的名字" required>
+                    <input type="email" placeholder="你的邮箱" required>
+                    <textarea placeholder="你的消息" rows="5" required></textarea>
+                    <button type="submit" class="btn btn-primary">发送消息</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2026 Zephyr. All rights reserved.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-zhihu"></i></a>
+                    <a href="#"><i class="fab fa-bilibili"></i></a>
+                    <a href="#"><i class="fas fa-blog"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
