@@ -237,7 +237,7 @@
                             <span>JavaScript</span>
                             <span>响应式</span>
                         </div>
-                        <a href="#" class="portfolio-link">查看详情 →</a>
+                        <a href="javascript:void(0)" class="portfolio-link" onclick="openModal('modal1')">查看详情 →</a>
                     </div>
                 </div>
                 <div class="portfolio-item">
@@ -252,7 +252,7 @@
                             <span>AI</span>
                             <span>RAG</span>
                         </div>
-                        <a href="#" class="portfolio-link">查看详情 →</a>
+                        <a href="javascript:void(0)" class="portfolio-link" onclick="openModal('modal2')">查看详情 →</a>
                     </div>
                 </div>
                 <div class="portfolio-item">
@@ -267,7 +267,7 @@
                             <span>AI</span>
                             <span>语音交互</span>
                         </div>
-                        <a href="#" class="portfolio-link">即将推出 →</a>
+                        <a href="javascript:void(0)" class="portfolio-link" onclick="openModal('modal3')">即将推出 →</a>
                     </div>
                 </div>
                 <div class="portfolio-item">
@@ -282,7 +282,8 @@
                             <span>Canvas</span>
                             <span>进行中</span>
                         </div>
-                        <a href="#" class="portfolio-link">即将推出 →</a>
+                        <a href="snake.html" class="portfolio-link" target="_blank">🐍 玩贪吃蛇</a>
+                        <a href="javascript:void(0)" class="portfolio-link" onclick="openModal('modal4')" style="margin-left:10px;">查看详情 →</a>
                     </div>
                 </div>
             </div>
@@ -382,5 +383,101 @@
     </footer>
 
     <script src="script.js"></script>
+
+    <!-- 项目详情弹窗 -->
+    <div id="modal1" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('modal1')">&times;</span>
+            <h2>个人网站</h2>
+            <div class="modal-body">
+                <p><strong>📝 项目描述：</strong></p>
+                <p>暗黑科技风格响应式个人主页，包含作品集、技术博客、在线简历等模块。支持密码保护隐藏个人信息，采用赛博朋克视觉设计。</p>
+                <br>
+                <p><strong>🔧 使用技术：</strong></p>
+                <p>• HTML5 + CSS3（霓虹发光效果、动画）</p>
+                <p>• JavaScript（密码验证、矩阵动画）</p>
+                <p>• GitHub Pages 部署</p>
+                <br>
+                <p><strong>🔗 项目链接：</strong></p>
+                <p><a href="https://zephyer-zhang.github.io" target="_blank">🌐 访问网站</a> | <a href="https://github.com/Zephyer-Zhang/Zephyer-Zhang.github.io" target="_blank">💻 查看代码</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal2" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('modal2')">&times;</span>
+            <h2>RAG知识库系统</h2>
+            <div class="modal-body">
+                <p><strong>📝 项目描述：</strong></p>
+                <p>基于 RAGFlow 的本地 AI 知识库系统，支持上传课程文档（PDF/Word/TXT），通过 RAG（检索增强生成）技术实现精准问答。可离线运行，保护隐私。</p>
+                <br>
+                <p><strong>🔧 使用技术：</strong></p>
+                <p>• Docker + RAGFlow 镜像部署</p>
+                <p>• DeepSeek / 通义千问 大模型</p>
+                <p>• 文本嵌入模型（text-embedding-v3）</p>
+                <br>
+                <p><strong>📚 应用场景：</strong></p>
+                <p>• 课程笔记快速检索</p>
+                <p>• 考试重点智能问答</p>
+                <p>• 论文摘要自动生成</p>
+                <br>
+                <p><strong>🖼️ 系统截图：</strong></p>
+                <div style="margin: 15px 0; text-align: center;">
+                    <img src="https://raw.githubusercontent.com/infiniflow/ragflow-docs/refs/heads/image/image/chunking.gif" alt="RAGFlow 文档分块" style="width: 100%; border-radius: 8px; border: 1px solid #00ff88; margin-bottom: 10px;">
+                    <p style="font-size: 12px; color: #888;">▲ 文档智能分块处理</p>
+                </div>
+                <div style="margin: 15px 0; text-align: center;">
+                    <img src="https://raw.githubusercontent.com/infiniflow/ragflow-docs/refs/heads/image/image/agentic-dark.gif" alt="RAGFlow 问答演示" style="width: 100%; border-radius: 8px; border: 1px solid #00ff88;">
+                    <p style="font-size: 12px; color: #888;">▲ AI 智能问答演示</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal3" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('modal3')">&times;</span>
+            <h2>AI答辩模拟助手</h2>
+            <div class="modal-body">
+                <p><strong>📝 项目描述：</strong></p>
+                <p>AI 驱动的答辩练习系统，模拟老师与学生之间的对话场景。支持语音识别输入、AI 生成追问、语音播报回答，帮助学生在家自主练习答辩。</p>
+                <br>
+                <p><strong>🔧 使用技术：</strong></p>
+                <p>• Python + Whisper（语音识别）</p>
+                <p>• Edge TTS（中文语音合成）</p>
+                <p>• DeepSeek API（智能问答生成）</p>
+                <p>• PyQt5（桌面 GUI）</p>
+                <br>
+                <p><strong>🚀 项目状态：</strong></p>
+                <p>设计中，预计 2026 年暑假完成原型。</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal4" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('modal4')">&times;</span>
+            <h2>经典小游戏合集</h2>
+            <div class="modal-body">
+                <p><strong>📝 项目描述：</strong></p>
+                <p>使用纯 JavaScript 实现的经典小游戏合集，无需任何框架，直接在浏览器中运行。</p>
+                <br>
+                <p><strong>🔧 使用技术：</strong></p>
+                <p>• HTML5 Canvas（游戏画面渲染）</p>
+                <p>• JavaScript（游戏逻辑、碰撞检测）</p>
+                <p>• CSS3（动画效果、霓虹风格）</p>
+                <br>
+                <p><strong>🎮 包含游戏：</strong></p>
+                <p>• <a href="snake.html" target="_blank" style="color:#00ff88;">🐍 贪吃蛇（Snake）</a> - 已完成 ✅</p>
+                <p>• 2048（数字合并）- 制作中...</p>
+                <p>• 扫雷（Minesweeper）- 制作中...</p>
+                <br>
+                <p><strong>🚀 项目状态：</strong></p>
+                <p>贪吃蛇已完成，其他游戏持续更新中...</p>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
