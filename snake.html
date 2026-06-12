@@ -5,317 +5,951 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>贪吃蛇 - Zephyr</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background: #0a0a0a;
-            color: #00ff88;
-            font-family: 'Courier New', monospace;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            overflow: hidden;
+            background: #0a0a0a; color: #00ff88; font-family: 'Courier New', monospace;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; overflow: hidden;
         }
-
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-            animation: glow 2s ease-in-out infinite;
-        }
-
-        @keyframes glow {
-            0%, 100% { text-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88; }
-            50% { text-shadow: 0 0 20px #00ff88, 0 0 30px #00ff88, 0 0 40px #00ff88; }
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-
-        .stats {
-            display: flex;
-            gap: 30px;
-            margin-bottom: 20px;
-            font-size: 1.2rem;
-        }
-
-        .stat {
-            background: rgba(0, 255, 136, 0.1);
-            padding: 10px 20px;
-            border: 1px solid #00ff88;
-            border-radius: 5px;
-        }
-
-        #gameCanvas {
-            border: 2px solid #00ff88;
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
-            background: #000;
-        }
-
-        .controls {
-            margin-top: 20px;
-            text-align: center;
-            color: #888;
-            font-size: 0.9rem;
-        }
-
+        .header { text-align: center; margin-bottom: 12px; animation: glow 2s ease-in-out infinite; }
+        @keyframes glow { 0%,100% { text-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88; } 50% { text-shadow: 0 0 20px #00ff88, 0 0 30px #00ff88, 0 0 40px #00ff88; } }
+        h1 { font-size: 2rem; margin-bottom: 6px; }
+        .difficulty-btns { display: flex; gap: 8px; margin-bottom: 10px; }
         .btn {
-            background: transparent;
-            color: #00ff88;
-            border: 1px solid #00ff88;
-            padding: 10px 20px;
-            margin: 10px;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-            font-size: 1rem;
-            transition: all 0.3s;
+            background: transparent; color: #00ff88; border: 1px solid #00ff88;
+            padding: 8px 16px; margin: 3px; cursor: pointer;
+            font-family: 'Courier New', monospace; font-size: 0.9rem;
+            transition: all 0.3s; border-radius: 5px;
         }
-
-        .btn:hover {
-            background: #00ff88;
-            color: #0a0a0a;
-            box-shadow: 0 0 20px #00ff88;
-        }
-
+        .btn:hover { background: #00ff88; color: #0a0a0a; box-shadow: 0 0 20px #00ff88; }
+        .btn.active { background: #00ff88; color: #0a0a0a; }
+        .diff-btn.easy { color: #00ff88; border-color: #00ff88; }
+        .diff-btn.medium { color: #ffaa00; border-color: #ffaa00; }
+        .diff-btn.medium:hover, .diff-btn.medium.active { background: #ffaa00; color: #0a0a0a; }
+        .diff-btn.hard { color: #ff0088; border-color: #ff0088; }
+        .diff-btn.hard:hover, .diff-btn.hard.active { background: #ff0088; color: #0a0a0a; }
+        .stats { display: flex; gap: 10px; margin-bottom: 10px; font-size: 0.95rem; flex-wrap: wrap; justify-content: center; }
+        .stat { background: rgba(0,255,136,0.1); padding: 6px 12px; border: 1px solid #00ff88; border-radius: 5px; }
+        .stat.difficulty { background: rgba(255,136,0,0.1); border-color: #ffaa00; color: #ffaa00; }
+        .stat.coins { background: rgba(255,215,0,0.1); border-color: #ffd700; color: #ffd700; }
+        .stat.shield { background: rgba(255,0,136,0.1); border-color: #ff0088; color: #ff0088; }
+        .stat.turns { background: rgba(0,170,255,0.1); border-color: #00aaff; color: #00aaff; }
+        #gameCanvas { border: 2px solid #00ff88; box-shadow: 0 0 20px rgba(0,255,136,0.5); background: #000; }
+        .legend { margin-top: 10px; display: flex; gap: 14px; font-size: 0.78rem; flex-wrap: wrap; justify-content: center; color: #aaa; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-box { width: 14px; height: 14px; border-radius: 3px; }
+        .legend-box.obstacle { background: #666; border: 1px solid #888; }
+        .legend-box.trap { background: #ff0000; box-shadow: 0 0 5px #ff0000; }
+        .legend-box.shield-fruit { background: #ff0088; }
+        .legend-box.coin-fruit { background: #ffd700; }
+        .legend-box.turn-fruit { background: #00aaff; }
         .game-over {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.95);
-            border: 2px solid #00ff88;
-            padding: 40px;
-            text-align: center;
-            display: none;
-            z-index: 1000;
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+            background: rgba(0,0,0,0.96); border: 2px solid #00ff88;
+            padding: 30px; text-align: center; display: none; z-index: 1000; border-radius: 10px;
         }
-
-        .game-over h2 {
-            font-size: 2rem;
-            margin-bottom: 20px;
-            color: #ff0088;
-            animation: glow-red 2s ease-in-out infinite;
-        }
-
-        @keyframes glow-red {
-            0%, 100% { text-shadow: 0 0 10px #ff0088; }
-            50% { text-shadow: 0 0 20px #ff0088, 0 0 30px #ff0088; }
-        }
-
+        .game-over h2 { font-size: 1.6rem; margin-bottom: 15px; color: #ff0088; animation: glow-red 2s ease-in-out infinite; }
+        @keyframes glow-red { 0%,100% { text-shadow: 0 0 10px #ff0088; } 50% { text-shadow: 0 0 20px #ff0088, 0 0 30px #ff0088; } }
         .back-link {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: #00ff88;
-            text-decoration: none;
-            border: 1px solid #00ff88;
-            padding: 10px 20px;
-            transition: all 0.3s;
+            position: absolute; top: 15px; left: 15px;
+            color: #00ff88; text-decoration: none; border: 1px solid #00ff88;
+            padding: 8px 16px; transition: all 0.3s; border-radius: 5px;
         }
-
-        .back-link:hover {
-            background: #00ff88;
-            color: #0a0a0a;
+        .back-link:hover { background: #00ff88; color: #0a0a0a; }
+        .controls { margin-top: 12px; text-align: center; color: #888; font-size: 0.85rem; }
+        .shop-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.88); display: none; z-index: 2000;
+            align-items: center; justify-content: center;
         }
+        .shop-panel {
+            background: #111; border: 2px solid #ffd700; padding: 25px 35px; border-radius: 10px;
+            text-align: center; min-width: 260px; max-width: 320px;
+        }
+        .shop-panel h2 { color: #ffd700; margin-bottom: 15px; font-size: 1.3rem; }
+        .shop-item { margin: 12px 0; font-size: 1rem; }
+        .shop-item button { margin-left: 10px; }
+        .shop-close { margin-top: 18px; color: #ffd700; border-color: #ffd700; }
+        .shop-close:hover { background: #ffd700; color: #0a0a0a; }
+        .auto-upgrade-msg {
+            position: fixed; top: 18%; left: 50%; transform: translateX(-50%);
+            background: rgba(255,170,0,0.92); color: #0a0a0a; padding: 10px 24px;
+            border-radius: 8px; font-size: 1rem; font-weight: bold; z-index: 3000;
+            display: none; white-space: nowrap;
+        }
+        .mobile-controls { display: none; margin-top: 15px; }
+        @media (max-width: 600px) {
+            .mobile-controls { display: grid; grid-template-columns: repeat(3,60px); grid-template-rows: repeat(3,60px); gap: 5px; }
+            .mobile-btn { background: rgba(0,255,136,0.2); border: 1px solid #00ff88; color: #00ff88; font-size: 1.5rem; cursor: pointer; border-radius: 5px; }
+            .mobile-btn:active { background: #00ff88; color: #0a0a0a; }
+            .mobile-btn.up { grid-column: 2; grid-row: 1; }
+            .mobile-btn.left { grid-column: 1; grid-row: 2; }
+            .mobile-btn.right { grid-column: 3; grid-row: 2; }
+            .mobile-btn.down { grid-column: 2; grid-row: 3; }
+        }
+        .tip-bar { font-size: 0.78rem; color: #666; margin-top: 6px; }
     </style>
 </head>
 <body>
-    <a href="index.html" class="back-link">← 返回作品集</a>
-    
-    <div class="header">
-        <h1>🐍 贪吃蛇</h1>
+
+<a href="index.html" class="back-link">← 返回</a>
+
+<div class="header"><h1>🐍 贪吃蛇</h1></div>
+
+<div class="difficulty-btns">
+    <button class="btn diff-btn easy active" onclick="setDifficulty('easy')">😊 简单</button>
+    <button class="btn diff-btn medium" onclick="setDifficulty('medium')">😰 中等</button>
+    <button class="btn diff-btn hard" onclick="setDifficulty('hard')">💀 困难</button>
+</div>
+
+<div class="stats">
+    <div class="stat">得分: <span id="score">0</span></div>
+    <div class="stat difficulty" id="diffDisplay">难度: 简单</div>
+    <div class="stat coins">🪙 <span id="coins">0</span></div>
+    <div class="stat shield" id="shieldStat">🛡️ <span id="shields">0</span>/<span id="shieldCap">3</span></div>
+    <div class="stat turns">↪️ <span id="turns">0</span></div>
+    <div class="stat" id="lengthDisplay">长度: 1/10</div>
+    <div class="stat">最高: <span id="highScore">0</span></div>
+</div>
+
+<canvas id="gameCanvas" width="400" height="400"></canvas>
+
+<div class="legend">
+    <div class="legend-item"><div class="legend-box" style="background:#00ff88;"></div><span>普通</span></div>
+    <div class="legend-item"><div class="legend-box shield-fruit"></div><span>🛡️护盾</span></div>
+    <div class="legend-item"><div class="legend-box coin-fruit"></div><span>🪙金币</span></div>
+    <div class="legend-item"><div class="legend-box turn-fruit"></div><span>↪️拐弯</span></div>
+    <div class="legend-item"><div class="legend-box obstacle"></div><span>障碍</span></div>
+    <div class="legend-item"><div class="legend-box trap"></div><span>陷阱</span></div>
+</div>
+
+<div class="tip-bar">按 <b>E</b> 商店 ｜ <b>空格</b> 暂停 ｜ <b>ESC</b> 退出 ｜ ↑↓←→ 方向</div>
+
+<div class="controls">
+    <button class="btn" onclick="startGame()">开始</button>
+    <button class="btn" onclick="togglePause()">暂停/继续</button>
+    <button class="btn surrender-btn" onclick="surrenderGame()">退出</button>
+</div>
+
+<div class="mobile-controls">
+    <div></div><button class="mobile-btn up" ontouchstart="dirMobile('up')">↑</button><div></div>
+    <button class="mobile-btn left" ontouchstart="dirMobile('left')">←</button><div></div>
+    <button class="mobile-btn right" ontouchstart="dirMobile('right')">→</button><div></div>
+    <button class="mobile-btn down" ontouchstart="dirMobile('down')">↓</button><div></div>
+</div>
+
+<!-- 完整商店 -->
+<div class="shop-overlay" id="shopOverlay">
+    <div class="shop-panel">
+        <h2>🪙 商 店</h2>
+        <p style="margin-bottom:12px; color:#aaa;">金币: <b id="shopCoins">0</b> 🪙</p>
+        <div class="shop-item">
+            🛡️ 护盾 (5🪙)
+            <br><button class="btn" onclick="buyItem('shield')" style="color:#ff0088;border-color:#ff0088;margin-top:6px;">买1个</button>
+        </div>
+        <div class="shop-item">
+            ↪️ 强制转弯 (3🪙)
+            <br><button class="btn" onclick="buyItem('turn')" style="color:#00aaff;border-color:#00aaff;margin-top:6px;">买1个</button>
+        </div>
+        <p style="margin-top:10px;font-size:0.82rem;color:#666;">护盾: <span id="shopShields">0</span>/<span id="shopShieldCap">3</span> ｜ 转弯: <span id="shopTurns">0</span>/<span id="shopTurnsCap">3</span></p>
+        <button class="btn shop-close" onclick="closeShop()">关闭 (E)</button>
     </div>
+</div>
 
-    <div class="stats">
-        <div class="stat">得分: <span id="score">0</span></div>
-        <div class="stat">最高分: <span id="highScore">0</span></div>
+<!-- 随机商店（困难模式） -->
+<div class="shop-overlay" id="randomShopOverlay">
+    <div class="shop-panel">
+        <h2>🎲 神秘商店</h2>
+        <p style="margin-bottom:12px; color:#aaa;">金币: <b id="rShopCoins">0</b> 🪙</p>
+        <div id="rShopItems"></div>
+        <p style="margin-top:10px;font-size:0.82rem;color:#666;">护盾: <span id="rShopShields">0</span>/<span id="rShopShieldCap">9</span> ｜ 转弯: <span id="rShopTurns">0</span>/<span id="rShopTurnsCap">9</span></p>
+        <button class="btn shop-close" onclick="closeRandomShop()">关闭 (E)</button>
     </div>
+</div>
 
-    <canvas id="gameCanvas" width="400" height="400"></canvas>
+<div class="auto-upgrade-msg" id="upgradeMsg"></div>
 
-    <div class="controls">
-        <p>使用 ↑ ↓ ← → 控制方向 | 空格键 暂停</p>
-        <button class="btn" onclick="startGame()">开始游戏</button>
-        <button class="btn" onclick="togglePause()">暂停/继续</button>
-    </div>
+<div class="game-over" id="gameOver">
+    <h2>游戏结束!</h2>
+    <p style="font-size:1.3rem;margin:15px 0;">得分: <span id="finalScore">0</span></p>
+    <p id="deathReason" style="color:#888;margin-bottom:15px;"></p>
+    <p style="margin-bottom:10px;">本局最大长度: <span id="maxLength">0</span></p>
+    <p id="newRecord" style="color:#00ff88;font-size:1.2rem;margin-bottom:15px;display:none;">🎉 恭喜! 刷新纪录!</p>
+    <button class="btn" onclick="restartGame()">重新开始</button>
+    <button class="btn" id="btnContinue" style="background:#555;margin-left:10px;" onclick="continueGame()">继续游戏</button>
+</div>
 
-    <div class="game-over" id="gameOver">
-        <h2>游戏结束!</h2>
-        <p style="font-size: 1.5rem; margin: 20px 0;">最终得分: <span id="finalScore">0</span></p>
-        <button class="btn" onclick="restartGame()">重新开始</button>
-    </div>
+<script>
+(function(){
+    var canvas = document.getElementById('gameCanvas');
+    var ctx = canvas.getContext('2d');
+    var GS = 20, TC = canvas.width / GS;
 
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const gridSize = 20;
-        const tileCount = canvas.width / gridSize;
+    var snake, foods, dx, dy, score, highScore, coins, shields, forceTurns;
+    var gameLoop, isPaused, gameStarted, currentDifficulty;
+    var obstacles, traps;
+    var shopOpen, randomShopOpen;
+    var lastShopScore; // 上次触发商店的分数
+    var mediumShopShown; // 中等模式商店是否已显示过
+    var persistedCoins = parseInt(localStorage.getItem('snakeCoins')) || 0; // 持久化金币
 
-        let snake = [{ x: 10, y: 10 }];
-        let food = { x: 15, y: 15 };
-        let dx = 0;
-        let dy = 0;
-        let score = 0;
-        let highScore = localStorage.getItem('snakeHighScore') || 0;
-        let gameLoop;
-        let isPaused = false;
-        let gameStarted = false;
+    var shieldCaps = { easy: 3, medium: 5, hard: 9 };
+    var forceTurnsCaps = { easy: 3, medium: 5, hard: 9 };
+    var maxLengths = { easy: 10, medium: 15, hard: 20 };
+    var selfBitePenalty = { easy: 3, medium: 5, hard: 8 }; // 每节扣分
+    var MIN_LENGTH = 1; // 最短长度（只有头）
+    var startDifficulty = 'easy'; // 记录起始难度（闯关用）
 
-        document.getElementById('highScore').textContent = highScore;
+    var diffSettings = {
+        easy:   { speed: 150, obstacles: 0,  traps: 0,  pts: 5,  label:'简单' },
+        medium: { speed: 100, obstacles: 8,  traps: 0,  pts: 8,  label:'中等' },
+        hard:   { speed: 70,  obstacles: 10, traps: 5,  pts: 10, label:'困难' }
+    };
 
-        // 键盘控制
-        document.addEventListener('keydown', changeDirection);
+    var highScore = parseInt(localStorage.getItem('snakeHighScore')) || 0;
+    var maxLenThisRun = 1; // 本局最大长度
+    var maxLengthReached = false; // 是否已提示达到最大长度
+    document.getElementById('highScore').textContent = highScore;
+    document.getElementById('shieldCap').textContent = shieldCaps.easy;
 
-        function changeDirection(event) {
-            const key = event.key;
-            
-            if (key === ' ' || key === 'Spacebar') {
-                togglePause();
-                return;
-            }
+    function getShieldCap() {
+        return shieldCaps[currentDifficulty];
+    }
 
-            // 防止反向移动
-            if ((key === 'ArrowUp' || key === 'w') && dy === 0) {
-                dx = 0; dy = -1;
-                if (!gameStarted) startGame();
-            }
-            if ((key === 'ArrowDown' || key === 's') && dy === 0) {
-                dx = 0; dy = 1;
-                if (!gameStarted) startGame();
-            }
-            if ((key === 'ArrowLeft' || key === 'a') && dx === 0) {
-                dx = -1; dy = 0;
-                if (!gameStarted) startGame();
-            }
-            if ((key === 'ArrowRight' || key === 'd') && dx === 0) {
-                dx = 1; dy = 0;
-                if (!gameStarted) startGame();
-            }
-        }
-
-        function startGame() {
-            if (gameStarted) return;
-            gameStarted = true;
-            dx = 1; dy = 0;
-            gameLoop = setInterval(update, 100);
-        }
-
-        function togglePause() {
-            if (!gameStarted) return;
-            isPaused = !isPaused;
-            if (isPaused) {
-                clearInterval(gameLoop);
-            } else {
-                gameLoop = setInterval(update, 100);
-            }
-        }
-
-        function update() {
-            // 移动蛇头
-            const head = { x: snake[0].x + dx, y: snake[0].y + dy };
-
-            // 检查碰撞
-            if (head.x < 0 || head.x >= tileCount || 
-                head.y < 0 || head.y >= tileCount ||
-                snake.some(segment => segment.x === head.x && segment.y === head.y)) {
-                gameOver();
-                return;
-            }
-
-            snake.unshift(head);
-
-            // 检查是否吃到食物
-            if (head.x === food.x && head.y === food.y) {
-                score += 10;
-                document.getElementById('score').textContent = score;
-                generateFood();
-            } else {
-                snake.pop();
-            }
-
-            draw();
-        }
-
-        function draw() {
-            // 清空画布
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // 绘制网格
-            ctx.strokeStyle = '#0a3a0a';
-            for (let i = 0; i < tileCount; i++) {
-                for (let j = 0; j < tileCount; j++) {
-                    ctx.strokeRect(i * gridSize, j * gridSize, gridSize, gridSize);
-                }
-            }
-
-            // 绘制蛇
-            snake.forEach((segment, index) => {
-                ctx.fillStyle = index === 0 ? '#00ff88' : '#00cc66';
-                ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize - 2, gridSize - 2);
-                
-                // 蛇头眼睛
-                if (index === 0) {
-                    ctx.fillStyle = '#000';
-                    const eyeSize = 3;
-                    const offsetX = dx === 1 ? 12 : dx === -1 ? 4 : 6;
-                    const offsetY = dy === 1 ? 12 : dy === -1 ? 4 : 6;
-                    ctx.fillRect(segment.x * gridSize + offsetX, segment.y * gridSize + offsetY, eyeSize, eyeSize);
-                    ctx.fillRect(segment.x * gridSize + offsetX + (dx === 0 ? 6 : 0), segment.y * gridSize + offsetY + (dy === 0 ? 6 : 0), eyeSize, eyeSize);
-                }
-            });
-
-            // 绘制食物
-            ctx.fillStyle = '#ff0088';
-            ctx.beginPath();
-            ctx.arc(food.x * gridSize + gridSize / 2, food.y * gridSize + gridSize / 2, gridSize / 2 - 2, 0, Math.PI * 2);
-            ctx.fill();
-        }
-
-        function generateFood() {
-            do {
-                food = {
-                    x: Math.floor(Math.random() * tileCount),
-                    y: Math.floor(Math.random() * tileCount)
-                };
-            } while (snake.some(segment => segment.x === food.x && segment.y === food.y));
-        }
-
-        function gameOver() {
-            clearInterval(gameLoop);
-            gameStarted = false;
-            
-            if (score > highScore) {
-                highScore = score;
-                localStorage.setItem('snakeHighScore', highScore);
-                document.getElementById('highScore').textContent = highScore;
-            }
-
-            document.getElementById('finalScore').textContent = score;
-            document.getElementById('gameOver').style.display = 'block';
-        }
-
-        function restartGame() {
-            snake = [{ x: 10, y: 10 }];
-            dx = 0;
-            dy = 0;
-            score = 0;
-            document.getElementById('score').textContent = score;
-            document.getElementById('gameOver').style.display = 'none';
-            generateFood();
-            draw();
-        }
-
-        // 初始绘制
-        generateFood();
+    function init() {
+        // 初始蛇长1节（只有头）
+        snake = [{x:10, y:10}];
+        foods = [];
+        dx = 0; dy = 0;
+        score = 0; coins = persistedCoins; shields = 0; forceTurns = 0;
+        isPaused = false; gameStarted = false; shopOpen = false; randomShopOpen = false;
+        lastShopScore = 0; mediumShopShown = false;
+        maxLenThisRun = 1; maxLengthReached = false;
+        obstacles = []; traps = [];
+        document.getElementById('score').textContent = 0;
+        document.getElementById('coins').textContent = coins;
+        document.getElementById('shields').textContent = 0;
+        document.getElementById('turns').textContent = 0;
+        document.getElementById('lengthDisplay').textContent = '长度: ' + snake.length + '/' + maxLengths[currentDifficulty];
+        generateObstacles();
+        generateTraps();
+        refillFoods();
         draw();
-    </script>
+    }
+
+    function setDifficulty(d) {
+        currentDifficulty = d;
+        startDifficulty = d; // 记录选关起点
+        var s = diffSettings[d];
+        document.querySelectorAll('.diff-btn').forEach(function(b){ b.classList.remove('active'); });
+        document.querySelector('.diff-btn.' + d).classList.add('active');
+        document.getElementById('diffDisplay').textContent = '难度: ' + s.label;
+        document.getElementById('shieldCap').textContent = getShieldCap();
+        document.getElementById('lengthDisplay').textContent = '长度: 1/' + maxLengths[d];
+        clearInterval(gameLoop);
+        gameStarted = false;
+        // 切换难度时重置分数和商店状态
+        score = 0; coins = 0; shields = 0; forceTurns = 0;
+        lastShopScore = 0; mediumShopShown = false;
+        upgradeDone = { toMedium: false, toHard: false };
+        // 重置时也加载持久化的金币
+        coins = persistedCoins;
+        document.getElementById('score').textContent = 0;
+        document.getElementById('coins').textContent = coins;
+        document.getElementById('shields').textContent = 0;
+        document.getElementById('turns').textContent = 0;
+        init();
+    }
+
+    function generateObstacles() {
+        obstacles = [];
+        var count = diffSettings[currentDifficulty].obstacles;
+        for (var i = 0; i < count; i++) {
+            var pos = randFreeSafe();
+            if (pos) obstacles.push(pos);
+        }
+    }
+
+    function generateTraps() {
+        traps = [];
+        var count = diffSettings[currentDifficulty].traps;
+        for (var i = 0; i < count; i++) {
+            var pos = randFreeSafe();
+            if (pos) traps.push(pos);
+        }
+    }
+
+    // 生成时排除蛇头周围2格，避免刚升级就撞死
+    function randFreeSafe() {
+        for (var t = 0; t < 200; t++) {
+            var p = {x: Math.floor(Math.random()*TC), y: Math.floor(Math.random()*TC)};
+            // 排除蛇头周围2格
+            if (snake.length > 0) {
+                var hx = snake[0].x, hy = snake[0].y;
+                if (Math.abs(p.x - hx) <= 2 && Math.abs(p.y - hy) <= 2) continue;
+            }
+            if (isFree(p)) return p;
+        }
+        return null;
+    }
+
+    function randFree() {
+        for (var t = 0; t < 200; t++) {
+            var p = {x: Math.floor(Math.random()*TC), y: Math.floor(Math.random()*TC)};
+            if (isFree(p)) return p;
+        }
+        return null;
+    }
+
+    function isFree(p) {
+        if (p.x < 0 || p.x >= TC || p.y < 0 || p.y >= TC) return false;
+        if (Math.abs(p.x-10) <= 3 && Math.abs(p.y-10) <= 3) return false;
+        for (var i = 0; i < snake.length; i++) if (snake[i].x===p.x && snake[i].y===p.y) return false;
+        for (var i = 0; i < obstacles.length; i++) if (obstacles[i].x===p.x && obstacles[i].y===p.y) return false;
+        for (var i = 0; i < traps.length; i++) if (traps[i].x===p.x && traps[i].y===p.y) return false;
+        for (var i = 0; i < foods.length; i++) if (foods[i].x===p.x && foods[i].y===p.y) return false;
+        return true;
+    }
+
+    function refillFoods() {
+        while (foods.length < 3) addFood();
+        if (foods.length < 5 && Math.random() < 0.5) addFood();
+    }
+
+    function addFood() {
+        if (foods.length >= 5) return;
+        var p = randFree();
+        if (!p) return;
+        var r = Math.random(), type = 'normal';
+        if (r < 0.70) type = 'normal';
+        else if (r < 0.85) type = 'coin';
+        else type = (Math.random() < 0.5) ? 'shield' : 'turn';
+        var item = { x: p.x, y: p.y, type: type };
+        if (type === 'coin') item.value = Math.floor(Math.random()*5) + 1;
+        foods.push(item);
+    }
+
+    function startGame() {
+        if (gameStarted) return;
+        gameStarted = true;
+        dx = 1; dy = 0;
+        gameLoop = setInterval(update, diffSettings[currentDifficulty].speed);
+    }
+
+    function togglePause() {
+        if (!gameStarted || shopOpen || randomShopOpen) return;
+        isPaused = !isPaused;
+        if (isPaused) {
+            clearInterval(gameLoop);
+            ctx.fillStyle = 'rgba(0,0,0,0.65)';
+            ctx.fillRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = '#00ff88'; ctx.font = '26px Courier New'; ctx.textAlign = 'center';
+            ctx.fillText('暂停中...', canvas.width/2, canvas.height/2);
+        } else {
+            gameLoop = setInterval(update, diffSettings[currentDifficulty].speed);
+        }
+    }
+
+    // ========== 商店系统 ==========
+
+    function canOpenShopManually() {
+        // 简单模式可以随时按E打开商店
+        if (currentDifficulty === 'easy') return true;
+        // 中等和困难模式不能手动打开商店
+        return false;
+    }
+
+    function tryAutoShop() {
+        // 检查是否需要弹出商店
+        if (currentDifficulty === 'easy') {
+            // 简单模式：每50分50%概率
+            if (score >= 50 && score % 50 === 0 && score !== lastShopScore) {
+                lastShopScore = score;
+                if (Math.random() < 0.5) {
+                    openFullShop();
+                }
+            }
+        } else if (currentDifficulty === 'hard') {
+            // 困难模式：每50分50%概率，弹出随机商店
+            if (score >= 50 && score % 50 === 0 && score !== lastShopScore) {
+                lastShopScore = score;
+                if (Math.random() < 0.5) {
+                    openRandomShop();
+                }
+            }
+        }
+    }
+
+    function openFullShop() {
+        if (isPaused || shopOpen || randomShopOpen) return;
+        shopOpen = true;
+        isPaused = true;
+        clearInterval(gameLoop);
+        document.getElementById('shopCoins').textContent = coins;
+        document.getElementById('shopShields').textContent = shields;
+        document.getElementById('shopShieldCap').textContent = getShieldCap();
+        document.getElementById('shopTurns').textContent = forceTurns;
+        document.getElementById('shopTurnsCap').textContent = forceTurnsCaps[currentDifficulty];
+        document.getElementById('shopOverlay').style.display = 'flex';
+    }
+
+    window.closeShop = closeShop;
+    window.closeRandomShop = closeRandomShop;
+
+    function closeShop() {
+        shopOpen = false;
+        isPaused = false;
+        document.getElementById('shopOverlay').style.display = 'none';
+        if (gameStarted) {
+            gameLoop = setInterval(update, diffSettings[currentDifficulty].speed);
+        }
+    }
+
+    function openRandomShop() {
+        if (isPaused || shopOpen || randomShopOpen) return;
+        randomShopOpen = true;
+        isPaused = true;
+        clearInterval(gameLoop);
+
+        // 生成随机商店内容
+        var items = [];
+        // 随机决定是否卖护盾
+        if (Math.random() < 0.6) {
+            var maxShields = Math.min(3, getShieldCap() - shields);
+            if (maxShields > 0) {
+                var num = Math.floor(Math.random() * maxShields) + 1;
+                items.push({ type: 'shield', num: num, price: 5 });
+            }
+        }
+        // 随机决定是否卖转弯
+        if (Math.random() < 0.5) {
+            var num = Math.floor(Math.random() * 2) + 1;
+            items.push({ type: 'turn', num: num, price: 3 });
+        }
+        // 如果什么都没生成，至少卖1个护盾
+        if (items.length === 0) {
+            var maxS = Math.min(1, getShieldCap() - shields);
+            if (maxS > 0) items.push({ type: 'shield', num: 1, price: 5 });
+        }
+
+        var html = '';
+        items.forEach(function(item, idx) {
+            if (item.type === 'shield') {
+                html += '<div class="shop-item">🛡️ 护盾 x' + item.num + ' (' + (item.price * item.num) + '🪙)<br>' +
+                        '<button class="btn" onclick="buyRandomItem(' + idx + ')" style="color:#ff0088;border-color:#ff0088;margin-top:6px;">购买</button></div>';
+            } else {
+                html += '<div class="shop-item">↪️ 强制转弯 x' + item.num + ' (' + (item.price * item.num) + '🪙)<br>' +
+                        '<button class="btn" onclick="buyRandomItem(' + idx + ')" style="color:#00aaff;border-color:#00aaff;margin-top:6px;">购买</button></div>';
+            }
+        });
+        document.getElementById('rShopItems').innerHTML = html;
+        document.getElementById('rShopCoins').textContent = coins;
+        document.getElementById('rShopShields').textContent = shields;
+        document.getElementById('rShopShieldCap').textContent = getShieldCap();
+        document.getElementById('rShopTurns').textContent = forceTurns;
+        document.getElementById('rShopTurnsCap').textContent = forceTurnsCaps[currentDifficulty];
+        document.getElementById('randomShopOverlay').style.display = 'flex';
+
+        // 保存随机商店数据
+        window._rShopItems = items;
+    }
+
+    function closeRandomShop() {
+        randomShopOpen = false;
+        isPaused = false;
+        document.getElementById('randomShopOverlay').style.display = 'none';
+        if (gameStarted) {
+            gameLoop = setInterval(update, diffSettings[currentDifficulty].speed);
+        }
+    }
+
+    window.buyItem = function(type) {
+        if (type === 'shield') {
+            if (shields >= getShieldCap()) { alert('护盾已满 (' + getShieldCap() + '/' + getShieldCap() + ')'); return; }
+            if (coins >= 5) { coins -= 5; shields++; }
+            else { alert('金币不足! 需要 5 🪙'); return; }
+        } else if (type === 'turn') {
+            if (forceTurns >= forceTurnsCaps[currentDifficulty]) { alert('强制拐弯已满 (' + forceTurns + '/' + forceTurnsCaps[currentDifficulty] + ')'); return; }
+            if (coins >= 3) { coins -= 3; forceTurns++; }
+            else { alert('金币不足! 需要 3 🪙'); return; }
+        }
+        localStorage.setItem('snakeCoins', coins);
+        persistedCoins = coins;
+        updateUI();
+        document.getElementById('shopCoins').textContent = coins;
+        document.getElementById('shopShields').textContent = shields;
+        document.getElementById('shopTurns').textContent = forceTurns;
+    };
+
+    window.buyRandomItem = function(idx) {
+        var item = window._rShopItems[idx];
+        if (!item) return;
+        var totalPrice = item.price * item.num;
+        if (coins < totalPrice) { alert('金币不足! 需要 ' + totalPrice + ' 🪙'); return; }
+        coins -= totalPrice;
+        if (item.type === 'shield') {
+            for (var i = 0; i < item.num; i++) {
+                if (shields < getShieldCap()) shields++;
+            }
+        } else if (item.type === 'turn') {
+            forceTurns += item.num;
+        }
+        updateUI();
+        closeRandomShop();
+    };
+
+    // ========== 难度自动升级 ==========
+    // 升级条件按起始难度分别设定：
+    //   从简单开始：50分升中等, 150分升困难
+    //   从中等开始：直接玩中等, 100分升困难（中等模式的50分触发在tryAutoShop中）
+    //   从困难开始：直接玩困难，不升级
+    var upgradeThresholds = {
+        easy: { easyToMedium: 50, mediumToHard: 150 },
+        medium: { easyToMedium: 99999, mediumToHard: 100 },
+        hard: { easyToMedium: 99999, mediumToHard: 99999 }
+    };
+    var upgradeDone = { toMedium: false, toHard: false }; // 防止重复升级
+
+    function checkAutoUpgrade() {
+        var thresholds = upgradeThresholds[startDifficulty];
+        if (!thresholds) return;
+        if (!upgradeDone.toMedium && currentDifficulty === 'easy' && score >= thresholds.easyToMedium) {
+            upgradeDone.toMedium = true;
+            currentDifficulty = 'medium';
+            document.getElementById('lengthDisplay').textContent = '长度: ' + snake.length + '/' + maxLengths.medium;
+            var s = diffSettings.medium;
+            document.querySelectorAll('.diff-btn').forEach(function(b){ b.classList.remove('active'); });
+            document.querySelector('.diff-btn.medium').classList.add('active');
+            document.getElementById('diffDisplay').textContent = '难度: ' + s.label;
+            document.getElementById('shieldCap').textContent = getShieldCap();
+            // 生成中等难度的障碍物
+            generateObstacles();
+            generateTraps();
+            showUpgradeMsg('难度升级: 简单 → 中等!');
+            setTimeout(function() { openFullShop(); }, 800);
+        } else if (!upgradeDone.toHard && currentDifficulty === 'medium' && score >= thresholds.mediumToHard) {
+            upgradeDone.toHard = true;
+            currentDifficulty = 'hard';
+            document.getElementById('lengthDisplay').textContent = '长度: ' + snake.length + '/' + maxLengths.hard;
+            var s = diffSettings.hard;
+            document.querySelectorAll('.diff-btn').forEach(function(b){ b.classList.remove('active'); });
+            document.querySelector('.diff-btn.hard').classList.add('active');
+            document.getElementById('diffDisplay').textContent = '难度: ' + s.label;
+            document.getElementById('shieldCap').textContent = getShieldCap();
+            // 生成困难难度的障碍物和陷阱
+            generateObstacles();
+            generateTraps();
+            showUpgradeMsg('难度升级: 中等 → 困难!');
+            setTimeout(function() { openFullShop(); }, 800);
+        }
+    }
+
+    function showUpgradeMsg(msg) {
+        var el = document.getElementById('upgradeMsg');
+        el.textContent = '⚡ ' + msg;
+        el.style.display = 'block';
+        setTimeout(function(){ el.style.display = 'none'; }, 2500);
+    }
+
+    // ========== 游戏逻辑 ==========
+
+    function update() {
+        var head = {x: snake[0].x + dx, y: snake[0].y + dy};
+
+        // 穿墙
+        if (head.x < 0) head.x = TC - 1;
+        if (head.x >= TC) head.x = 0;
+        if (head.y < 0) head.y = TC - 1;
+        if (head.y >= TC) head.y = 0;
+
+        // 强制拐弯自动规避：如果下一步要撞障碍/陷阱，消耗一次强制拐弯
+        if (forceTurns > 0) {
+            var nextX = head.x + dx;
+            var nextY = head.y + dy;
+            // 穿墙边界
+            if (nextX < 0) nextX = TC - 1;
+            if (nextX >= TC) nextX = 0;
+            if (nextY < 0) nextY = TC - 1;
+            if (nextY >= TC) nextY = 0;
+            var inDanger = false;
+            for (var di = 0; di < obstacles.length; di++) {
+                if (obstacles[di].x === nextX && obstacles[di].y === nextY) { inDanger = true; break; }
+            }
+            if (!inDanger) {
+                for (var ti = 0; ti < traps.length; ti++) {
+                    if (traps[ti].x === nextX && traps[ti].y === nextY) { inDanger = true; break; }
+                }
+            }
+            // 自己身体也算危险
+            if (!inDanger) {
+                for (var si = 0; si < snake.length; si++) {
+                    if (snake[si].x === nextX && snake[si].y === nextY) { inDanger = true; break; }
+                }
+            }
+            if (inDanger) {
+                // 找一个安全的替代方向
+                var alternatives = [];
+                var dirs = [
+                    {dx: 0, dy: -1, name: '上'},
+                    {dx: 0, dy: 1, name: '下'},
+                    {dx: -1, dy: 0, name: '左'},
+                    {dx: 1, dy: 0, name: '右'}
+                ];
+                for (var gi = 0; gi < dirs.length; gi++) {
+                    var testDx = dirs[gi].dx;
+                    var testDy = dirs[gi].dy;
+                    // 不能180度掉头（除非蛇只有1节）
+                    if (testDx === -dx && testDy === -dy && snake.length > 1) continue;
+                    var tx = head.x + testDx;
+                    var ty = head.y + testDy;
+                    // 穿墙
+                    if (tx < 0) tx = TC - 1;
+                    if (tx >= TC) tx = 0;
+                    if (ty < 0) ty = TC - 1;
+                    if (ty >= TC) ty = 0;
+                    // 检查是否安全
+                    var safe = true;
+                    for (var oi = 0; oi < obstacles.length; oi++) {
+                        if (obstacles[oi].x === tx && obstacles[oi].y === ty) { safe = false; break; }
+                    }
+                    if (safe) {
+                        for (var tri = 0; tri < traps.length; tri++) {
+                            if (traps[tri].x === tx && traps[tri].y === ty) { safe = false; break; }
+                        }
+                    }
+                    if (safe) {
+                        for (var sgi = 0; sgi < snake.length; sgi++) {
+                            if (snake[sgi].x === tx && snake[sgi].y === ty) { safe = false; break; }
+                        }
+                    }
+                    if (safe) alternatives.push(dirs[gi]);
+                }
+                if (alternatives.length > 0) {
+                    var chosen = alternatives[Math.floor(Math.random() * alternatives.length)];
+                    dx = chosen.dx; dy = chosen.dy;
+                    // 重新计算下一步
+                    nextX = head.x + dx;
+                    nextY = head.y + dy;
+                    if (nextX < 0) nextX = TC - 1;
+                    if (nextX >= TC) nextX = 0;
+                    if (nextY < 0) nextY = TC - 1;
+                    if (nextY >= TC) nextY = 0;
+                    head.x = nextX; head.y = nextY;
+                    forceTurns--;
+                    showUpgradeMsg('💫 强制拐弯! 自动规避危险! (剩余' + forceTurns + '次)');
+                }
+            }
+        }
+
+        // 咬到自己（改：截断身体，扣分，不死亡）
+        var biteIdx = -1;
+        for (var i = 1; i < snake.length; i++) { // 从1开始，跳过头部
+            if (snake[i].x === head.x && snake[i].y === head.y) {
+                biteIdx = i;
+                break;
+            }
+        }
+        if (biteIdx !== -1) {
+            var lost = snake.length - biteIdx;
+            snake = snake.slice(0, biteIdx); // 截断身体（无论有没有护盾都扣长度）
+            if (shields > 0) {
+                // 有护盾：扣1层护盾，不扣分
+                shields--;
+                showUpgradeMsg('🛡️ 咬到自己! 护盾抵挡! 失去' + lost + '节, 护盾-1 (剩余' + shields + ')');
+            } else {
+                // 没护盾：扣分
+                var penalty = selfBitePenalty[currentDifficulty] * lost;
+                if (score < penalty) {
+                    gameOver('分数不足扣除惩罚! (需要' + penalty + '分, 当前' + score + '分)');
+                    return;
+                }
+                score -= penalty;
+                showUpgradeMsg('💢 咬到自己! 失去' + lost + '节, -' + penalty + '分');
+            }
+            if (snake.length < MIN_LENGTH) {
+                gameOver('身体太短了!');
+                return;
+            }
+        }
+
+        // 撞障碍物（有护盾时：护盾消失 + 障碍物消失重新生成）
+        for (var i = 0; i < obstacles.length; i++) {
+            if (obstacles[i].x === head.x && obstacles[i].y === head.y) {
+                if (shields > 0) {
+                    shields--;
+                    obstacles.splice(i, 1);
+                    var np = randFree();
+                    if (np) obstacles.push(np);
+                    showUpgradeMsg('🛡️ 护盾挡住了障碍物! 障碍消失!');
+                } else {
+                    gameOver('撞到障碍物了!'); return;
+                }
+            }
+        }
+
+        // 踩陷阱（有护盾时：护盾消失 + 陷阱消失重新生成）
+        for (var i = 0; i < traps.length; i++) {
+            if (traps[i].x === head.x && traps[i].y === head.y) {
+                if (shields > 0) {
+                    shields--;
+                    traps.splice(i, 1);
+                    var np = randFree();
+                    if (np) traps.push(np);
+                    showUpgradeMsg('🛡️ 护盾挡住了陷阱! 陷阱消失!');
+                } else {
+                    score = Math.max(0, score - 20);
+                    traps.splice(i, 1);
+                    var np = randFree();
+                    if (np) traps.push(np);
+                }
+                break;
+            }
+        }
+
+        snake.unshift(head);
+
+        // 吃食物
+        var ate = false;
+        for (var i = 0; i < foods.length; i++) {
+            if (foods[i].x === head.x && foods[i].y === head.y) {
+                if (foods[i].type === 'normal') {
+                    score += diffSettings[currentDifficulty].pts;
+                } else if (foods[i].type === 'shield') {
+                    if (shields < getShieldCap()) {
+                        shields++; showUpgradeMsg('🛡️ 护盾+1! (' + shields + '/' + getShieldCap() + ')');
+                    } else {
+                        showUpgradeMsg('🛡️ 护盾已满!');
+                    }
+                } else if (foods[i].type === 'coin') {
+                    coins += foods[i].value;
+                    showUpgradeMsg('🪙 +' + foods[i].value + ' 金币! (共' + coins + ')');
+                } else if (foods[i].type === 'turn') {
+                    if (forceTurns < forceTurnsCaps[currentDifficulty]) {
+                        forceTurns++; showUpgradeMsg('↪️ 强制拐弯+1! (' + forceTurns + '/' + forceTurnsCaps[currentDifficulty] + ')');
+                    } else {
+                        showUpgradeMsg('↪️ 拐弯已满!');
+                    }
+                }
+                foods.splice(i, 1);
+                ate = true;
+                break;
+            }
+        }
+
+        if (ate) {
+            // 追踪本局最大长度
+            if (snake.length > maxLenThisRun) {
+                maxLenThisRun = snake.length;
+            }
+            // 达到最大长度后，吃豆只加分，不变长
+            if (snake.length > maxLengths[currentDifficulty]) {
+                snake.pop(); // 移除尾巴，保持最大长度
+                if (!maxLengthReached) {
+                    maxLengthReached = true;
+                    showUpgradeMsg('🎉 恭喜! 已达到最大长度上限 ' + maxLengths[currentDifficulty] + '!');
+                }
+            }
+            refillFoods();
+            checkAutoUpgrade();
+            tryAutoShop();
+        } else {
+            // 没吃到食物，正常移动（移除尾巴）
+            snake.pop();
+        }
+
+        updateUI();
+        draw();
+    }
+
+    function draw() {
+        ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 网格
+        ctx.strokeStyle = '#0a2a0a';
+        for (var i = 0; i < TC; i++)
+            for (var j = 0; j < TC; j++)
+                ctx.strokeRect(i*GS, j*GS, GS, GS);
+
+        // 障碍物
+        obstacles.forEach(function(o){
+            ctx.fillStyle = '#444'; ctx.fillRect(o.x*GS, o.y*GS, GS-1, GS-1);
+            ctx.strokeStyle = '#666'; ctx.strokeRect(o.x*GS, o.y*GS, GS-1, GS-1);
+        });
+
+        // 陷阱
+        traps.forEach(function(t){
+            ctx.fillStyle = '#ff0000';
+            ctx.beginPath();
+            ctx.moveTo(t.x*GS+GS/2, t.y*GS+2);
+            ctx.lineTo(t.x*GS+GS-2, t.y*GS+GS-2);
+            ctx.lineTo(t.x*GS+2, t.y*GS+GS-2);
+            ctx.closePath(); ctx.fill();
+        });
+
+        // 食物
+        foods.forEach(function(f){
+            if (f.type === 'normal') {
+                ctx.fillStyle = '#00ff88';
+                ctx.beginPath();
+                ctx.arc(f.x*GS+GS/2, f.y*GS+GS/2, GS/2-2, 0, Math.PI*2);
+                ctx.fill();
+            } else if (f.type === 'shield') {
+                ctx.fillStyle = '#ff0088';
+                ctx.beginPath();
+                ctx.arc(f.x*GS+GS/2, f.y*GS+GS/2, GS/2-2, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = '#fff'; ctx.font = '11px Courier New'; ctx.textAlign = 'center';
+                ctx.fillText('🛡', f.x*GS+GS/2-5, f.y*GS+GS/2+4);
+            } else if (f.type === 'coin') {
+                ctx.fillStyle = '#ffd700';
+                ctx.beginPath();
+                ctx.arc(f.x*GS+GS/2, f.y*GS+GS/2, GS/2-2, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = '#000'; ctx.font = '10px Courier New'; ctx.textAlign = 'center';
+                ctx.fillText(f.value, f.x*GS+GS/2, f.y*GS+GS/2+4);
+            } else if (f.type === 'turn') {
+                ctx.fillStyle = '#00aaff';
+                ctx.beginPath();
+                ctx.arc(f.x*GS+GS/2, f.y*GS+GS/2, GS/2-2, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = '#fff'; ctx.font = '11px Courier New'; ctx.textAlign = 'center';
+                ctx.fillText('↪', f.x*GS+GS/2-5, f.y*GS+GS/2+4);
+            }
+        });
+
+        // 蛇
+        snake.forEach(function(seg, idx){
+            var gv = Math.max(100, 255 - idx*8);
+            ctx.fillStyle = idx === 0 ? '#00ff88' : 'rgb(0,'+gv+','+Math.floor(gv*0.5)+')';
+            ctx.fillRect(seg.x*GS, seg.y*GS, GS-2, GS-2);
+            if (idx === 0) {
+                ctx.fillStyle = '#000';
+                var ox = dx===1 ? 11 : dx===-1 ? 3 : 6;
+                var oy = dy===1 ? 11 : dy===-1 ? 3 : 6;
+                ctx.fillRect(seg.x*GS+ox, seg.y*GS+oy, 3, 3);
+                ctx.fillRect(seg.x*GS+ox+(dx===0?6:0), seg.y*GS+oy+(dy===0?6:0), 3, 3);
+            }
+        });
+    }
+
+    function updateUI() {
+        document.getElementById('score').textContent = score;
+        document.getElementById('coins').textContent = coins;
+        document.getElementById('shields').textContent = shields;
+        document.getElementById('turns').textContent = forceTurns;
+        document.getElementById('lengthDisplay').textContent = '长度: ' + snake.length + '/' + maxLengths[currentDifficulty];
+    }
+
+    function gameOver(reason) {
+        clearInterval(gameLoop);
+        gameStarted = false;
+        var isNewRecord = false;
+        if (score > highScore) {
+            isNewRecord = true;
+            highScore = score;
+            localStorage.setItem('snakeHighScore', highScore);
+            document.getElementById('highScore').textContent = highScore;
+        }
+        document.getElementById('finalScore').textContent = score;
+        document.getElementById('deathReason').textContent = reason;
+        document.getElementById('maxLength').textContent = maxLenThisRun;
+        // 显示是否刷新纪录
+        if (isNewRecord) {
+            document.getElementById('newRecord').style.display = 'block';
+        } else {
+            document.getElementById('newRecord').style.display = 'none';
+        }
+        // 障碍物/陷阱死亡：不显示继续按钮
+        var noContinue = (reason.indexOf('障碍物') !== -1) || (reason.indexOf('陷阱') !== -1);
+        var btn = document.getElementById('btnContinue');
+        if (btn) btn.style.display = noContinue ? 'none' : 'inline-block';
+        document.getElementById('gameOver').style.display = 'block';
+    }
+
+    window.restartGame = function() {
+        document.getElementById('gameOver').style.display = 'none';
+        // 保存金币到持久存储
+        localStorage.setItem('snakeCoins', coins);
+        persistedCoins = coins;
+        init();
+    };
+
+    window.continueGame = function() {
+        document.getElementById('gameOver').style.display = 'none';
+        // 保存金币
+        localStorage.setItem('snakeCoins', coins);
+        persistedCoins = coins;
+        // 保留分数、长度、金币、护盾、强制拐弯，重新开始移动
+        dx = 0; dy = 0;
+        isPaused = false; gameStarted = false; shopOpen = false; randomShopOpen = false;
+        // 清除蛇头位置的障碍和陷阱
+        for (var i = obstacles.length - 1; i >= 0; i--) {
+            if (obstacles[i].x === snake[0].x && obstacles[i].y === snake[0].y) {
+                obstacles.splice(i, 1);
+                var np = randFree();
+                if (np) obstacles.push(np);
+            }
+        }
+        for (var i = traps.length - 1; i >= 0; i--) {
+            if (traps[i].x === snake[0].x && traps[i].y === snake[0].y) {
+                traps.splice(i, 1);
+                var np = randFree();
+                if (np) traps.push(np);
+            }
+        }
+        // 补充食物
+        refillFoods();
+        updateUI();
+        // 等玩家按键重新开始移动
+    };
+
+    document.addEventListener('keydown', function(e){
+        var k = e.key;
+        if (k === 'e' || k === 'E') {
+            if (shopOpen) { closeShop(); return; }
+            if (randomShopOpen) { closeRandomShop(); return; }
+            if (canOpenShopManually()) { openFullShop(); }
+            return;
+        }
+        if (k === 'Escape') { surrenderGame(); return; }
+        if (k === ' ') { togglePause(); return; }
+        if ((k==='ArrowUp'||k==='w'||k==='W') && dy===0) { dx=0; dy=-1; if(!gameStarted) startGame(); }
+        if ((k==='ArrowDown'||k==='s'||k==='S') && dy===0) { dx=0; dy=1; if(!gameStarted) startGame(); }
+        if ((k==='ArrowLeft'||k==='a'||k==='A') && dx===0) { dx=-1; dy=0; if(!gameStarted) startGame(); }
+        if ((k==='ArrowRight'||k==='d'||k==='D') && dx===0) { dx=1; dy=0; if(!gameStarted) startGame(); }
+    });
+
+    window.dirMobile = function(dir) {
+        if ((dir==='up'&&dy===0)) { dx=0; dy=-1; if(!gameStarted) startGame(); }
+        if ((dir==='down'&&dy===0)) { dx=0; dy=1; if(!gameStarted) startGame(); }
+        if ((dir==='left'&&dx===0)) { dx=-1; dy=0; if(!gameStarted) startGame(); }
+        if ((dir==='right'&&dx===0)) { dx=1; dy=0; if(!gameStarted) startGame(); }
+    };
+
+    // 暴露函数到全局，使 onclick 按钮生效
+    window.startGame = startGame;
+    window.togglePause = togglePause;
+    window.setDifficulty = setDifficulty;
+    window.surrenderGame = surrenderGame;
+
+    function surrenderGame() {
+        // 随时可退出：保存金币、重置分数，然后直接重新开始
+        localStorage.setItem('snakeCoins', coins);
+        persistedCoins = coins;
+        // 保存最高分
+        if (score > highScore) {
+            highScore = score;
+            localStorage.setItem('snakeHighScore', highScore);
+            document.getElementById('highScore').textContent = highScore;
+        }
+        document.getElementById('gameOver').style.display = 'none';
+        init();
+    }
+
+    // 删除开场商店提示（不再强制弹窗）
+    // 改为：只在界面显示 "按E打开商店" 的提示
+    setDifficulty('easy');
+})();
+</script>
 </body>
 </html>
