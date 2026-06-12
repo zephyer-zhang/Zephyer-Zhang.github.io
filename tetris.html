@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TETRIS // 暗黑科技</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;color:#00ff88;font-family:'Courier New',monospace;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:10px;overflow-x:hidden}
+h1{text-align:center;font-size:1.6rem;letter-spacing:8px;text-shadow:0 0 15px #00ff88,0 0 30px #00ff8844;margin:8px 0}
+.game-wrap{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;justify-content:center}
+canvas{border:2px solid #00ff88;box-shadow:0 0 20px rgba(0,255,136,0.4);background:#050510}
+.side{display:flex;flex-direction:column;gap:8px}
+.panel{background:rgba(0,255,136,0.05);border:1px solid #00ff8844;border-radius:6px;padding:10px;min-width:120px}
+.panel h3{font-size:0.8rem;color:#00ff8899;margin-bottom:6px;letter-spacing:2px}
+.panel .val{font-size:1.4rem;color:#00ff88;text-shadow:0 0 8px #00ff88}
+.controls{margin-top:12px;font-size:0.75rem;color:#00ff8888;text-align:center;line-height:1.6;max-width:340px}
+.controls kbd{background:rgba(0,255,136,0.15);border:1px solid #00ff8844;border-radius:3px;padding:1px 6px;color:#00ff88}
+.btn{background:transparent;border:1px solid #00ff88;color:#00ff88;padding:6px 14px;border-radius:4px;cursor:pointer;font-family:inherit;font-size:0.85rem;margin:2px;transition:all .2s}
+.btn:hover{background:rgba(0,255,136,0.2);box-shadow:0 0 10px #00ff8844}
+.btn-row{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+.overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:none;justify-content:center;align-items:center;z-index:100;flex-direction:column;gap:16px}
+.overlay h2{font-size:1.8rem;text-shadow:0 0 20px #00ff88}
+.overlay .score{font-size:1.2rem;color:#ffd700}
+.mobile-controls{display:none;margin-top:8px;gap:4px;justify-content:center;flex-wrap:wrap}
+@media(max-width:600px){.mobile-controls{display:flex}.side{flex-direction:row;flex-wrap:wrap;justify-content:center}}
+</style>
+</head>
+<body>
+<h1>▸ TETRIS ◂</h1>
+<div class="game-wrap">
+  <div class="side">
+    <div class="panel"><h3>NEXT</h3><canvas id="nextCanvas" width="100" height="80"></canvas></div>
+    <div class="panel"><h3>SCORE</h3><div class="val" id="score">0</div></div>
+    <div class="panel"><h3>LEVEL</h3><div class="val" id="level">1</div></div>
+    <div class="panel"><h3>LINES</h3><div class="val" id="lines">0</div></div>
+    <div class="panel"><h3>BEST</h3><div class="val" id="best">0</div></div>
+  </div>
+  <canvas id="gameCanvas" width="300" height="600"></canvas>
+</div>
+<div class="controls">
+  <kbd>←→</kbd> 移动 &nbsp; <kbd>↑</kbd> 旋转 &nbsp; <kbd>↓</kbd> 加速 &nbsp; <kbd>Space</kbd> 硬降 &nbsp; <kbd>P</kbd> 暂停
+</div>
+<div class="btn-row">
+  <button class="btn" onclick="window.startGame()">开始</button>
+  <button class="btn" onclick="window.togglePause()">暂停</button>
+</div>
+<div class="mobile-controls">
+  <button class="btn" ontouchstart="window.moveLeft()">←</button>
+  <button class="btn" ontouchstart="window.moveRight()">→</button>
+  <button class="btn" ontouchstart="window.rotate()">↻</button>
+  <button class="btn" ontouchstart="window.softDrop()">↓</button>
+  <button class="btn" ontouchstart="window.hardDrop()">⏬</button>
+</div>
+<div class="overlay" id="gameOver">
+  <h2>GAME OVER</h2>
+  <div class="score" id="finalScore"></div>
+  <div id="newBest" style="color:#ffd700;display:none">🎉 新纪录!</div>
+  <button class="btn" onclick="window.startGame()">再来一局</button>
+</div>
+
+<script>
+(function(){
+var COLS=10,ROWS=20,GS=30;
+var canvas=document.getElementById('gameCanvas');
+var ctx=canvas.getContext('2d');
+var nCanvas=document.getElementById('nextCanvas');
+var nCtx=nCanvas.getContext('2d');
+
+// 方块定义：形状矩阵 + 颜色
+var PIECES=[
+  {m:[[1,1,1,1]],c:'#00ffff'},   // I
+  {m:[[1,1],[1,1]],c:'#ffd700'},  // O
+  {m:[[0,1,0],[1,1,1]],c:'#ff00ff'},// T
+  {m:[[0,1,1],[1,1,0]],c:'#00ff88'},// S
+  {m:[[1,1,0],[0,1,1]],c:'#ff4444'},// Z
+  {m:[[1,0,0],[1,1,1]],c:'#4488ff'},// J
+  {m:[[0,0,1],[1,1,1]],c:'#ff8800'} // L
+];
+
+var board,current,next,score,level,lines,best,gameRunning,isPaused,dropTimer,dropInterval;
+best=parseInt(localStorage.getItem('tetrisBest'))||0;
+document.getElementById('best').textContent=best;
+
+function init(){
+  board=[];
+  for(var r=0;r<ROWS;r++){board[r]=[];for(var c=0;c<COLS;c++)board[r][c]=0;}
+  score=0;level=1;lines=0;dropInterval=800;
+  current=spawnPiece();next=spawnPiece();
+  gameRunning=true;isPaused=false;
+  document.getElementById('gameOver').style.display='none';
+  updateUI();
+  drawNext();
+  if(dropTimer)clearInterval(dropTimer);
+  dropTimer=setInterval(tick,dropInterval);
+  draw();
+}
+
+function spawnPiece(){
+  var p=PIECES[Math.floor(Math.random()*PIECES.length)];
+  return{m:p.m.map(function(r){return r.slice()}),c:p.c,x:Math.floor((COLS-p.m[0].length)/2),y:0};
+}
+
+function rotate(m){
+  var rows=m.length,cols=m[0].length,res=[];
+  for(var c=0;c<cols;c++){res[c]=[];for(var r=rows-1;r>=0;r--)res[c][rows-1-r]=m[r][c];}
+  return res;
+}
+
+function valid(m,ox,oy){
+  for(var r=0;r<m.length;r++)for(var c=0;c<m[r].length;c++){
+    if(!m[r][c])continue;
+    var nx=ox+c,ny=oy+r;
+    if(nx<0||nx>=COLS||ny>=ROWS)return false;
+    if(ny>=0&&board[ny][nx])return false;
+  }
+  return true;
+}
+
+function lock(){
+  var m=current.m;
+  for(var r=0;r<m.length;r++)for(var c=0;c<m[r].length;c++){
+    if(!m[r][c])continue;
+    var ny=current.y+r,nx=current.x+c;
+    if(ny<0){gameRunning=false;endGame();return;}
+    board[ny][nx]=current.c;
+  }
+  clearLines();
+  current=next;next=spawnPiece();drawNext();
+  if(!valid(current.m,current.x,current.y)){gameRunning=false;endGame();}
+}
+
+function clearLines(){
+  var cleared=0;
+  for(var r=ROWS-1;r>=0;r--){
+    var full=true;
+    for(var c=0;c<COLS;c++)if(!board[r][c]){full=false;break;}
+    if(full){board.splice(r,1);board.unshift(new Array(COLS).fill(0));cleared++;r++;}
+  }
+  if(cleared>0){
+    var pts=[0,100,300,500,800];
+    score+=pts[cleared]*level;
+    lines+=cleared;
+    level=Math.floor(lines/10)+1;
+    dropInterval=Math.max(100,800-(level-1)*70);
+    clearInterval(dropTimer);
+    dropTimer=setInterval(tick,dropInterval);
+    updateUI();
+  }
+}
+
+function tick(){
+  if(!gameRunning||isPaused)return;
+  if(valid(current.m,current.x,current.y+1)){current.y++;}
+  else{lock();}
+  draw();
+}
+
+function moveLeft(){if(gameRunning&&!isPaused&&valid(current.m,current.x-1,current.y)){current.x--;draw();}}
+function moveRight(){if(gameRunning&&!isPaused&&valid(current.m,current.x+1,current.y)){current.x++;draw();}}
+function softDrop(){if(gameRunning&&!isPaused&&valid(current.m,current.x,current.y+1)){current.y++;score++;updateUI();draw();}}
+function hardDrop(){
+  if(!gameRunning||isPaused)return;
+  while(valid(current.m,current.x,current.y+1)){current.y++;score+=2;}
+  updateUI();lock();draw();
+}
+function rotatePiece(){
+  if(!gameRunning||isPaused)return;
+  var rm=rotate(current.m);
+  // wall kick: try 0, -1, +1, -2, +2
+  for(var k of[0,-1,1,-2,2]){
+    if(valid(rm,current.x+k,current.y)){current.m=rm;current.x+=k;draw();return;}
+  }
+}
+
+function draw(){
+  ctx.fillStyle='#050510';ctx.fillRect(0,0,canvas.width,canvas.height);
+  // grid lines
+  ctx.strokeStyle='rgba(0,255,136,0.06)';ctx.lineWidth=1;
+  for(var c=0;c<=COLS;c++){ctx.beginPath();ctx.moveTo(c*GS,0);ctx.lineTo(c*GS,ROWS*GS);ctx.stroke();}
+  for(var r=0;r<=ROWS;r++){ctx.beginPath();ctx.moveTo(0,r*GS);ctx.lineTo(COLS*GS,r*GS);ctx.stroke();}
+  // board
+  for(var r=0;r<ROWS;r++)for(var c=0;c<COLS;c++){
+    if(board[r][c])drawCell(ctx,c,r,board[r][c]);
+  }
+  // ghost piece
+  if(current&&gameRunning){
+    var gy=current.y;
+    while(valid(current.m,current.x,gy+1))gy++;
+    if(gy!==current.y){
+      ctx.globalAlpha=0.2;
+      var m=current.m;
+      for(var r=0;r<m.length;r++)for(var c=0;c<m[r].length;c++){
+        if(m[r][c])drawCell(ctx,current.x+c,gy+r,current.c);
+      }
+      ctx.globalAlpha=1;
+    }
+    // current piece
+    var m=current.m;
+    for(var r=0;r<m.length;r++)for(var c=0;c<m[r].length;c++){
+      if(m[r][c])drawCell(ctx,current.x+c,current.y+r,current.c);
+    }
+  }
+}
+
+function drawCell(c,x,y,color){
+  c.fillStyle=color;
+  c.fillRect(x*GS+1,y*GS+1,GS-2,GS-2);
+  c.fillStyle='rgba(255,255,255,0.15)';
+  c.fillRect(x*GS+1,y*GS+1,GS-2,4);
+  c.fillStyle='rgba(0,0,0,0.2)';
+  c.fillRect(x*GS+1,y*GS+GS-5,GS-2,4);
+}
+
+function drawNext(){
+  nCtx.fillStyle='#050510';nCtx.fillRect(0,0,nCanvas.width,nCanvas.height);
+  if(!next)return;
+  var m=next.m,cs=20;
+  var ox=(nCanvas.width-m[0].length*cs)/2;
+  var oy=(nCanvas.height-m.length*cs)/2;
+  for(var r=0;r<m.length;r++)for(var c=0;c<m[r].length;c++){
+    if(m[r][c]){
+      nCtx.fillStyle=next.c;
+      nCtx.fillRect(ox+c*cs+1,oy+r*cs+1,cs-2,cs-2);
+      nCtx.fillStyle='rgba(255,255,255,0.15)';
+      nCtx.fillRect(ox+c*cs+1,oy+r*cs+1,cs-2,3);
+    }
+  }
+}
+
+function updateUI(){
+  document.getElementById('score').textContent=score;
+  document.getElementById('level').textContent=level;
+  document.getElementById('lines').textContent=lines;
+}
+
+function endGame(){
+  clearInterval(dropTimer);
+  var isNew=false;
+  if(score>best){best=score;localStorage.setItem('tetrisBest',best);isNew=true;}
+  document.getElementById('best').textContent=best;
+  document.getElementById('finalScore').textContent='得分: '+score;
+  document.getElementById('newBest').style.display=isNew?'block':'none';
+  document.getElementById('gameOver').style.display='flex';
+}
+
+function startGame(){init();}
+function togglePause(){
+  if(!gameRunning)return;
+  isPaused=!isPaused;
+  if(isPaused)clearInterval(dropTimer);
+  else dropTimer=setInterval(tick,dropInterval);
+}
+
+// keyboard
+document.addEventListener('keydown',function(e){
+  if(!gameRunning)return;
+  switch(e.key){
+    case'ArrowLeft':moveLeft();e.preventDefault();break;
+    case'ArrowRight':moveRight();e.preventDefault();break;
+    case'ArrowDown':softDrop();e.preventDefault();break;
+    case'ArrowUp':rotatePiece();e.preventDefault();break;
+    case' ':hardDrop();e.preventDefault();break;
+    case'p':case'P':togglePause();break;
+  }
+});
+
+// expose
+window.startGame=startGame;
+window.togglePause=togglePause;
+window.moveLeft=moveLeft;
+window.moveRight=moveRight;
+window.softDrop=softDrop;
+window.hardDrop=hardDrop;
+window.rotate=rotatePiece;
+
+// initial draw
+draw();
+})();
+</script>
+</body>
+</html>
