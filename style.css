@@ -31,7 +31,7 @@ body {
 
 /* 导航栏 */
 #navbar {
-    position: fiixed;
+    position: fixed;
     top: 0;
     width: 100%;
     background: rgba(10, 10, 10, 0.95);
@@ -943,7 +943,7 @@ footer p {
     color: var(--primary);
 }
 
-/* 响应式 */
+/* ===== 响应式（全面改善手机适配） ===== */
 @media (max-width: 768px) {
     .menu-toggle {
         display: block;
@@ -951,51 +951,125 @@ footer p {
 
     .nav-links {
         position: fixed;
-        top: 70px;
+        top: 0;
         right: -100%;
-        width: 100%;
-        height: calc(100vh - 70px);
+        width: 80%;
+        max-width: 320px;
+        height: 100vh;
         background: rgba(10, 10, 10, 0.98);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
         flex-direction: column;
-        padding: 50px;
-        transition: right 0.3s;
+        padding: 90px 30px 30px;
+        transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: -5px 0 30px rgba(0,0,0,0.5);
+        border-left: 1px solid rgba(0,255,65,0.15);
+        z-index: 999;
     }
 
     .nav-links.active {
         right: 0;
     }
 
-    .hero-content {
-        flex-direction: column;
-        text-align: center;
+    .nav-links li {
+        opacity: 0;
+        transform: translateX(30px);
+        transition: all 0.3s ease;
     }
 
-    .hero-text h1 {
-        font-size: 2.5rem;
+    .nav-links.active li {
+        opacity: 1;
+        transform: translateX(0);
     }
 
-    .hero-buttons {
-        justify-content: center;
+    .nav-links.active li:nth-child(1) { transition-delay: 0.08s; }
+    .nav-links.active li:nth-child(2) { transition-delay: 0.14s; }
+    .nav-links.active li:nth-child(3) { transition-delay: 0.20s; }
+    .nav-links.active li:nth-child(4) { transition-delay: 0.26s; }
+    .nav-links.active li:nth-child(5) { transition-delay: 0.32s; }
+    .nav-links.active li:nth-child(6) { transition-delay: 0.38s; }
+
+    .nav-links a {
+        font-size: 1.2rem;
+        padding: 12px 0;
+        display: block;
     }
 
-    .about-content {
-        flex-direction: column;
+    .section { padding: 60px 0; }
+    .section-dark { padding: 60px 0; }
+    .section-title { font-size: 1.8rem; }
+    .section-subtitle { font-size: 0.95rem; margin-bottom: 30px; }
+
+    .hero { padding: 80px 16px 40px; }
+    .hero-content { flex-direction: column-reverse; text-align: center; gap: 20px; }
+    .hero-text h1 { font-size: 2.2rem; }
+    .subtitle { font-size: 1.1rem; }
+    .description { font-size: 0.95rem; }
+    .hero-buttons { justify-content: center; flex-wrap: wrap; gap: 12px; }
+    .hero-buttons .btn { flex: 1; min-width: 140px; text-align: center; padding: 12px 20px; }
+
+    .tech-circle { width: 180px; height: 180px; }
+    .tech-circle i { font-size: 2.5rem; }
+
+    .about-content { flex-direction: column; gap: 20px; }
+    .about-image { order: -1; }
+    .about-avatar { width: 160px; height: 160px; }
+    .about-stats { flex-direction: row; gap: 10px; flex-wrap: wrap; justify-content: center; padding-top: 20px; margin-top: 20px; }
+    .stat { flex: 1; min-width: 80px; }
+    .stat-number { font-size: 1.8rem; }
+    .stat-label { font-size: 0.8rem; }
+
+    .skills-grid { grid-template-columns: 1fr; gap: 16px; }
+    .skill-card { padding: 20px; }
+    .skill-card i { font-size: 2rem; }
+
+    .portfolio-grid { grid-template-columns: 1fr; gap: 16px; }
+    .portfolio-image { height: 140px; font-size: 3rem; }
+    .portfolio-info { padding: 16px; }
+    .portfolio-info h3 { font-size: 1.1rem; }
+    .portfolio-info p { font-size: 0.9rem; }
+    .portfolio-tags { gap: 6px; }
+    .portfolio-tags span { font-size: 0.75rem; padding: 4px 8px; }
+    /* 游戏链接在手机上换行展示 */
+    .portfolio-info .portfolio-link {
+        display: inline-block;
+        margin: 3px 6px 3px 0 !important;
+        font-size: 0.85rem;
+        padding: 4px 8px;
+        background: rgba(0,255,65,0.08);
+        border-radius: 4px;
+        white-space: nowrap;
     }
 
-    .about-stats {
-        flex-direction: column;
-        gap: 20px;
-    }
+    .contact-content { flex-direction: column; gap: 24px; }
+    .contact-info { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    .contact-item { margin-bottom: 0; padding: 14px; }
+    .contact-item i { font-size: 1.5rem; }
+    .contact-form { padding: 20px; }
+    .contact-form input, .contact-form textarea { padding: 12px; font-size: 16px; } /* 16px 防iOS缩放 */
 
-    .contact-content {
-        flex-direction: column;
-    }
+    .footer-content { flex-direction: column; gap: 16px; text-align: center; }
+    .social-links { justify-content: center; gap: 16px; }
+    .social-links a { font-size: 1.3rem; }
 
-    .footer-content {
-        flex-direction: column;
-        gap: 20px;
-        text-align: center;
-    }
+    .encrypted-header { padding: 12px 14px; font-size: 0.9rem; }
+    .encrypted-body { padding: 0 14px 14px; }
+
+    .container { padding: 0 14px; }
+}
+
+/* 小屏手机 (400px以下) */
+@media (max-width: 400px) {
+    .hero-text h1 { font-size: 1.8rem; }
+    .tech-circle { width: 140px; height: 140px; }
+    .tech-circle i { font-size: 2rem; }
+    .about-avatar { width: 130px; height: 130px; }
+    .about-stats { gap: 6px; }
+    .stat-number { font-size: 1.4rem; }
+    .about-text p { font-size: 0.9rem; }
+    .btn { font-size: 0.9rem; padding: 10px 16px; }
+    .password-input-wrap { flex-direction: column; }
+    .password-btn { width: 100%; }
 }
 
 /* 滚动动画 */

@@ -12,13 +12,42 @@ window.addEventListener('scroll', function() {
 const menuToggle = document.querySelector('.menu-toggle');
 const navLinks = document.querySelector('.nav-links');
 
-menuToggle.addEventListener('click', function() {
-    navLinks.classList.toggle('active');
+// 创建菜单背景遮罩
+var navOverlay = document.createElement('div');
+navOverlay.id = 'navOverlay';
+navOverlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:998;display:none;opacity:0;transition:opacity 0.3s ease;';
+document.body.appendChild(navOverlay);
+
+function toggleNav(show) {
+    if (show) {
+        navLinks.classList.add('active');
+        navOverlay.style.display = 'block';
+        setTimeout(function() { navOverlay.style.opacity = '1'; }, 10);
+        document.body.style.overflow = 'hidden';
+    } else {
+        navLinks.classList.remove('active');
+        navOverlay.style.opacity = '0';
+        setTimeout(function() { navOverlay.style.display = 'none'; }, 300);
+        document.body.style.overflow = '';
+    }
+}
+
+menuToggle.addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (navLinks.classList.contains('active')) {
+        toggleNav(false);
+    } else {
+        toggleNav(true);
+    }
+});
+
+navOverlay.addEventListener('click', function() {
+    toggleNav(false);
 });
 
 document.querySelectorAll('.nav-links a').forEach(link => {
-    link.addEventListener('click', () => {
-        navLinks.classList.remove('active');
+    link.addEventListener('click', function() {
+        toggleNav(false);
     });
 });
 
@@ -302,13 +331,16 @@ if (downloadResumeBtn) {
 
 // ============ 页面初始化 ============
 document.addEventListener('DOMContentLoaded', function() {
-    const animateElements = document.querySelectorAll('.section, .skill-card, .portfolio-item, .blog-card, .contact-item');
-    animateElements.forEach(el => {
-        el.classList.add('fade-in');
-    });
-    checkFadeIn();
+    // 移动端不启用 fade-in 动画（性能和兼容性考虑）
+    if (window.innerWidth > 768) {
+        const animateElements = document.querySelectorAll('.section, .skill-card, .portfolio-item, .blog-card, .contact-item');
+        animateElements.forEach(el => {
+            el.classList.add('fade-in');
+        });
+        checkFadeIn();
+        window.addEventListener('scroll', checkFadeIn);
+    }
     animateNumbers();
-    window.addEventListener('scroll', checkFadeIn);
 });
 
 // ============ 页面加载动画 ============
