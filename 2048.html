@@ -21,6 +21,7 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            touch-action: none;
         }
 
         .container {
@@ -277,6 +278,102 @@
     </div>
 
     <script>
+        // ============ 音效系统 (Web Audio API) ============
+        let audioCtx = null;
+        let audioInitialized = false;
+
+        function initAudio() {
+            if (audioInitialized) return;
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                audioInitialized = true;
+            } catch(e) {
+                console.warn('Web Audio API 不支持:', e);
+            }
+        }
+
+        // 确保音频上下文在用户交互后启动
+        document.addEventListener('click', initAudio, { once: true });
+        document.addEventListener('keydown', initAudio, { once: true });
+        document.addEventListener('touchstart', initAudio, { once: true });
+
+        function playTone(freq, duration, type = 'sine', volume = 0.3) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function playNoise(duration, volume = 0.1) {
+            if (!audioCtx) return;
+            const bufferSize = audioCtx.sampleRate * duration;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = (Math.random() * 2 - 1) * 0.5;
+            }
+            const source = audioCtx.createBufferSource();
+            const gain = audioCtx.createGain();
+            source.buffer = buffer;
+            gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            source.connect(gain);
+            gain.connect(audioCtx.destination);
+            source.start();
+        }
+
+        // 1. 滑动/移动音（短促嘀声）
+        function playMoveSound() {
+            playTone(600, 0.08, 'sine', 0.15);
+        }
+
+        // 2. 合并音（上升音调，数值越大音越高）
+        function playMergeSound(value) {
+            const baseFreq = 300 + Math.log2(value) * 80;
+            playTone(baseFreq, 0.15, 'triangle', 0.25);
+            setTimeout(() => playTone(baseFreq * 1.25, 0.12, 'triangle', 0.2), 50);
+        }
+
+        // 3. 新方块出现音（轻微弹出声）
+        function playNewTileSound() {
+            playTone(800, 0.06, 'sine', 0.12);
+            setTimeout(() => playTone(1200, 0.04, 'sine', 0.08), 30);
+        }
+
+        // 4. 游戏结束音（下降音调）
+        function playGameOverSound() {
+            const notes = [400, 350, 300, 250, 200];
+            notes.forEach((freq, i) => {
+                setTimeout(() => playTone(freq, 0.2, 'sawtooth', 0.15), i * 100);
+            });
+        }
+
+        // 5. 达到2048胜利音（华丽上升音阶）
+        function playVictorySound() {
+            const notes = [523, 659, 784, 1047, 1319, 1568, 2093];
+            notes.forEach((freq, i) => {
+                setTimeout(() => {
+                    playTone(freq, 0.3, 'sine', 0.2);
+                    playTone(freq * 1.5, 0.2, 'sine', 0.1);
+                }, i * 80);
+            });
+            // 最后加一个和弦
+            setTimeout(() => {
+                playTone(1047, 0.8, 'sine', 0.25);
+                playTone(1319, 0.8, 'sine', 0.2);
+                playTone(1568, 0.8, 'sine', 0.2);
+                playTone(2093, 0.8, 'sine', 0.15);
+            }, 600);
+        }
+
+        // ============ 游戏主逻辑 ============
         const SIZE = 4;
         let grid = [];
         let score = 0;
@@ -366,6 +463,7 @@
             if (moving) return false;
             const old = grid.map(row => [...row]);
             let moved = false;
+            let hasMerge = false;
 
             // 旋转网格，统一向左处理
             function rotate(arr, times) {
@@ -392,6 +490,7 @@
                         const merged = line[i] * 2;
                         newLine.push(merged);
                         score += merged;
+                        hasMerge = true;
                         i++; // 跳过下一个
                     } else {
                         newLine.push(line[i]);
@@ -412,6 +511,10 @@
             if (moved) {
                 moving = true;
                 updateScore();
+                
+                // 播放在移动音效
+                playMoveSound();
+                
                 const pos = addRandom();
                 renderTiles();
                 // 标记新方块
@@ -419,7 +522,29 @@
                     const tiles = $tileLayer.querySelectorAll('.tile');
                     const lastTile = tiles[tiles.length - 1];
                     if (lastTile) lastTile.classList.add('new');
+                    // 播放新方块出现音
+                    setTimeout(() => playNewTileSound(), 50);
                 }
+                
+                // 播放合并音效
+                if (hasMerge) {
+                    // 找到合并的数值（取最大的）
+                    let maxMerged = 0;
+                    for (let r = 0; r < SIZE; r++) {
+                        for (let c = 0; c < SIZE; c++) {
+                            if (grid[r][c] !== 0 && grid[r][c] !== old[r][c]) {
+                                // 检查是否是合并结果
+                                if (grid[r][c] > maxMerged && grid[r][c] >= 4) {
+                                    maxMerged = grid[r][c];
+                                }
+                            }
+                        }
+                    }
+                    if (maxMerged > 0) {
+                        setTimeout(() => playMergeSound(maxMerged), 80);
+                    }
+                }
+                
                 setTimeout(() => {
                     moving = false;
                     checkGameState();
@@ -438,6 +563,8 @@
                         $overlayTitle.textContent = '🎉 恭喜！';
                         $finalScore.textContent = `分数: ${score}  |  继续挑战更高数字！`;
                         $overlay.classList.add('show');
+                        // 播放胜利音效
+                        playVictorySound();
                         // 不结束，允许继续
                         setTimeout(() => $overlay.classList.remove('show'), 3000);
                     }
@@ -459,6 +586,8 @@
             $overlayTitle.textContent = '游戏结束';
             $finalScore.textContent = `最终分数: ${score}`;
             $overlay.classList.add('show');
+            // 播放游戏结束音效
+            playGameOverSound();
         }
 
         // 键盘控制

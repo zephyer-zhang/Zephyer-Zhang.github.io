@@ -22,8 +22,9 @@ canvas{border:2px solid #00ff88;box-shadow:0 0 20px rgba(0,255,136,0.4);backgrou
 .overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:none;justify-content:center;align-items:center;z-index:100;flex-direction:column;gap:16px}
 .overlay h2{font-size:1.8rem;text-shadow:0 0 20px #00ff88}
 .overlay .score{font-size:1.2rem;color:#ffd700}
-.mobile-controls{display:none;margin-top:8px;gap:4px;justify-content:center;flex-wrap:wrap}
-@media(max-width:600px){.mobile-controls{display:flex}.side{flex-direction:row;flex-wrap:wrap;justify-content:center}}
+.mobile-controls{display:none;position:fixed;bottom:0;left:0;width:100%;background:rgba(0,0,0,0.9);border-top:1px solid #00ff8844;padding:8px;gap:4px;justify-content:center;flex-wrap:wrap;z-index:50;touch-action:manipulation}
+.mobile-controls .btn{touch-action:manipulation;min-width:50px;min-height:44px;font-size:1.2rem}
+@media(max-width:600px){.mobile-controls{display:flex}body{padding-bottom:60px}.side{flex-direction:row;flex-wrap:wrap;justify-content:center}#gameCanvas{touch-action:manipulation}}
 </style>
 </head>
 <body>
@@ -82,6 +83,34 @@ var board,current,next,score,level,lines,best,gameRunning,isPaused,dropTimer,dro
 best=parseInt(localStorage.getItem('tetrisBest'))||0;
 document.getElementById('best').textContent=best;
 
+// === Sound System (Web Audio API) ===
+var audioCtx=null;
+function getAudioCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playTone(freq,duration,type,vol){
+  var ctx=getAudioCtx(),osc=ctx.createOscillator(),gain=ctx.createGain();
+  osc.type=type||'square';osc.frequency.value=freq;
+  gain.gain.setValueAtTime(vol||0.08,ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+(duration||0.1));
+  osc.connect(gain);gain.connect(ctx.destination);
+  osc.start();osc.stop(ctx.currentTime+(duration||0.1));
+}
+function sndMove(){playTone(600,0.05,'square',0.06);}
+function sndRotate(){playTone(800,0.08,'square',0.07);}
+function sndHardDrop(){playTone(150,0.2,'sawtooth',0.1);}
+function sndClear(cnt){
+  if(cnt<=0)return;
+  playTone(523.25,0.15,'sine',0.1);
+  if(cnt>=2)setTimeout(function(){playTone(659.25,0.15,'sine',0.1);},80);
+  if(cnt>=3)setTimeout(function(){playTone(783.99,0.15,'sine',0.1);},160);
+  if(cnt>=4)setTimeout(function(){playTone(1046.50,0.15,'sine',0.1);},240);
+}
+function sndGameOver(){
+  playTone(400,0.3,'sawtooth',0.08);
+  setTimeout(function(){playTone(350,0.3,'sawtooth',0.08);},200);
+  setTimeout(function(){playTone(300,0.3,'sawtooth',0.08);},400);
+  setTimeout(function(){playTone(200,0.5,'sawtooth',0.08);},600);
+}
+
 function init(){
   board=[];
   for(var r=0;r<ROWS;r++){board[r]=[];for(var c=0;c<COLS;c++)board[r][c]=0;}
@@ -138,6 +167,7 @@ function clearLines(){
     if(full){board.splice(r,1);board.unshift(new Array(COLS).fill(0));cleared++;r++;}
   }
   if(cleared>0){
+    sndClear(cleared);
     var pts=[0,100,300,500,800];
     score+=pts[cleared]*level;
     lines+=cleared;
@@ -156,13 +186,13 @@ function tick(){
   draw();
 }
 
-function moveLeft(){if(gameRunning&&!isPaused&&valid(current.m,current.x-1,current.y)){current.x--;draw();}}
-function moveRight(){if(gameRunning&&!isPaused&&valid(current.m,current.x+1,current.y)){current.x++;draw();}}
-function softDrop(){if(gameRunning&&!isPaused&&valid(current.m,current.x,current.y+1)){current.y++;score++;updateUI();draw();}}
+function moveLeft(){if(gameRunning&&!isPaused&&valid(current.m,current.x-1,current.y)){current.x--;sndMove();draw();}}
+function moveRight(){if(gameRunning&&!isPaused&&valid(current.m,current.x+1,current.y)){current.x++;sndMove();draw();}}
+function softDrop(){if(gameRunning&&!isPaused&&valid(current.m,current.x,current.y+1)){current.y++;score++;sndMove();updateUI();draw();}}
 function hardDrop(){
   if(!gameRunning||isPaused)return;
   while(valid(current.m,current.x,current.y+1)){current.y++;score+=2;}
-  updateUI();lock();draw();
+  sndHardDrop();updateUI();lock();draw();
 }
 function rotatePiece(){
   if(!gameRunning||isPaused)return;
@@ -235,6 +265,7 @@ function updateUI(){
 }
 
 function endGame(){
+  sndGameOver();
   clearInterval(dropTimer);
   var isNew=false;
   if(score>best){best=score;localStorage.setItem('tetrisBest',best);isNew=true;}
@@ -273,6 +304,22 @@ window.moveRight=moveRight;
 window.softDrop=softDrop;
 window.hardDrop=hardDrop;
 window.rotate=rotatePiece;
+
+// === Touch Swipe ===
+var tsx=null,tsy=null;
+canvas.addEventListener('touchstart',function(e){
+  tsx=e.touches[0].clientX;tsy=e.touches[0].clientY;e.preventDefault();
+},{passive:false});
+canvas.addEventListener('touchend',function(e){
+  if(tsx===null)return;
+  var dx=e.changedTouches[0].clientX-tsx;
+  var dy=e.changedTouches[0].clientY-tsy;
+  var ax=Math.abs(dx),ay=Math.abs(dy);
+  if(Math.max(ax,ay)<25){tsx=tsy=null;return;}
+  if(ax>ay){dx>0?moveRight():moveLeft();}
+  else{dy>0?softDrop():rotatePiece();}
+  tsx=tsy=null;
+},{passive:true});
 
 // initial draw
 draw();

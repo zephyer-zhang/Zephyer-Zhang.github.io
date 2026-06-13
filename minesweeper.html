@@ -2,22 +2,23 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>MINESWEEPER // 暗黑科技</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a0a0f;color:#00ff88;font-family:'Courier New',monospace;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:10px;overflow-x:hidden}
+body{background:#0a0a0f;color:#00ff88;font-family:'Courier New',monospace;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:10px;padding-bottom:80px;overflow-x:hidden}
 h1{font-size:1.6rem;letter-spacing:6px;text-shadow:0 0 15px #00ff88,0 0 30px #00ff8844;margin:8px 0}
 .info{display:flex;gap:16px;margin:8px 0;flex-wrap:wrap;justify-content:center}
 .info .stat{background:rgba(0,255,136,0.05);border:1px solid #00ff8844;border-radius:6px;padding:6px 14px;font-size:1rem}
 .info .stat span{color:#00ff88;text-shadow:0 0 6px #00ff88}
-.btn{background:transparent;border:1px solid #00ff88;color:#00ff88;padding:6px 14px;border-radius:4px;cursor:pointer;font-family:inherit;font-size:0.85rem;margin:2px;transition:all .2s}
+.btn{background:transparent;border:1px solid #00ff88;color:#00ff88;padding:6px 14px;border-radius:4px;cursor:pointer;font-family:inherit;font-size:0.85rem;margin:2px;transition:all .2s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .btn:hover{background:rgba(0,255,136,0.2);box-shadow:0 0 10px #00ff8844}
 .btn.active{background:rgba(0,255,136,0.25);box-shadow:0 0 8px #00ff88}
+.btn:active{background:rgba(0,255,136,0.35);transform:scale(0.97)}
 .btn-row{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin:8px 0}
 .diff-row{display:flex;gap:6px;justify-content:center;margin:6px 0}
-#board{display:inline-grid;gap:1px;background:rgba(0,255,136,0.1);border:2px solid #00ff88;box-shadow:0 0 20px rgba(0,255,136,0.3);padding:2px;border-radius:4px;margin:6px 0}
-.cell{width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:bold;border-radius:2px;cursor:pointer;user-select:none;transition:all .1s}
+#board{display:inline-grid;gap:1px;background:rgba(0,255,136,0.1);border:2px solid #00ff88;box-shadow:0 0 20px rgba(0,255,136,0.3);padding:2px;border-radius:4px;margin:6px 0;touch-action:manipulation}
+.cell{width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:bold;border-radius:2px;cursor:pointer;user-select:none;transition:all .1s;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .cell.hidden{background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2)}
 .cell.hidden:hover{background:rgba(0,255,136,0.18);box-shadow:0 0 6px #00ff8844}
 .cell.revealed{background:rgba(0,0,0,0.4);border:1px solid rgba(0,255,136,0.08)}
@@ -32,14 +33,29 @@ h1{font-size:1.6rem;letter-spacing:6px;text-shadow:0 0 15px #00ff88,0 0 30px #00
 .overlay .score{font-size:1.2rem;color:#ffd700}
 .controls{font-size:0.75rem;color:#00ff8888;text-align:center;line-height:1.6;margin-top:4px}
 .controls kbd{background:rgba(0,255,136,0.15);border:1px solid #00ff8844;border-radius:3px;padding:1px 6px;color:#00ff88}
+
+/* Bottom action bar - mobile only */
+.mobile-bar{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(10,10,15,0.97);border-top:1px solid #00ff8844;padding:10px 12px;z-index:50;justify-content:center;align-items:center;gap:12px;box-shadow:0 -4px 20px rgba(0,255,136,0.15);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.mobile-bar .mbtn{flex:1;max-width:160px;padding:12px 8px;font-size:0.95rem;letter-spacing:1px;display:flex;align-items:center;justify-content:center;gap:6px}
+.mobile-bar .mbtn.primary{background:rgba(0,255,136,0.15);border:1px solid #00ff88;color:#00ff88}
+.mobile-bar .mbtn.secondary{background:rgba(0,255,136,0.05);border:1px solid #00ff8844;color:#00ff88}
+.mobile-bar .mbtn:active{background:rgba(0,255,136,0.3)}
+.mobile-bar .mbtn.active{background:rgba(255,170,0,0.2);border-color:rgba(255,170,0,0.6);color:#ffcc44}
+
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
-@media(max-width:600px){.cell{width:26px;height:26px;font-size:0.75rem}}
+@media(max-width:600px){
+  .cell{width:36px;height:36px;font-size:0.9rem;min-width:36px;min-height:36px}
+  #board{grid-template-columns:repeat(auto-fill,36px)}
+  .mobile-bar{display:flex}
+  .controls{display:none}
+  body{padding-bottom:80px}
+}
 </style>
 </head>
 <body>
 <h1>▸ MINESWEEPER ◂</h1>
 <div class="diff-row">
-  <button class="btn active" onclick="window.setDiff(0)">简单 9×9</button>
+  <button class="btn" onclick="window.setDiff(0)">简单 9×9</button>
   <button class="btn" onclick="window.setDiff(1)">中等 16×16</button>
   <button class="btn" onclick="window.setDiff(2)">困难 30×16</button>
 </div>
@@ -50,13 +66,21 @@ h1{font-size:1.6rem;letter-spacing:6px;text-shadow:0 0 15px #00ff88,0 0 30px #00
   <div class="stat">🏆 <span id="best">-</span></div>
 </div>
 <div id="board"></div>
-<div class="btn-row">
+<div class="btn-row" id="desktopControls">
   <button class="btn" onclick="window.newGame()">新游戏</button>
   <button class="btn" id="flagBtn" onclick="window.toggleFlagMode()">🚩 标记模式</button>
 </div>
 <div class="controls">
   <kbd>左键</kbd> 翻开 &nbsp; <kbd>右键</kbd> 标旗 &nbsp; <kbd>F</kbd> 切换标记模式 &nbsp; <kbd>R</kbd> 重新开始
 </div>
+
+<!-- Mobile bottom bar -->
+<div class="mobile-bar">
+  <button class="mbtn primary" id="mRevealBtn" ontouchstart="window._mTouch(event,'reveal')" onclick="window._mRevealTap()">👆 翻开</button>
+  <button class="mbtn secondary" id="mFlagBtn" ontouchstart="window._mTouch(event,'flag')" onclick="window._mFlagTap()">🚩 标旗</button>
+  <button class="mbtn secondary" ontouchstart="window.newGame()">🔄 重开</button>
+</div>
+
 <div class="overlay" id="result">
   <h2 id="resultTitle">GAME OVER</h2>
   <div class="score" id="resultMsg"></div>
@@ -65,6 +89,8 @@ h1{font-size:1.6rem;letter-spacing:6px;text-shadow:0 0 15px #00ff88,0 0 30px #00
 
 <script>
 (function(){
+'use strict';
+
 var DIFFS=[
   {rows:9,cols:9,mines:10,name:'easy'},
   {rows:16,cols:16,mines:40,name:'medium'},
@@ -72,6 +98,137 @@ var DIFFS=[
 ];
 var diff=0,rows,cols,mineTotal,grid,revealed,flagged,gameOver,gameWon,flagMode,timerVal,timerRef,firstClick;
 
+// Mobile mode tracking
+var mobileMode = false;
+var lastMTouchTime = 0;
+
+function detectMobile(){
+  mobileMode = window.matchMedia('(max-width:600px)').matches;
+}
+detectMobile();
+window.matchMedia('(max-width:600px)').addEventListener('change', detectMobile);
+
+// ========== AUDIO ENGINE ==========
+var AC = null;
+function getAC(){
+  if(!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
+  if(AC.state === 'suspended') AC.resume();
+  return AC;
+}
+
+function sfxRevealEmpty(){
+  try {
+    var ac = getAC();
+    var ctx = ac;
+    var g = ctx.createGain();
+    g.gain.setValueAtTime(0.22, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+    g.connect(ctx.destination);
+    var osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1200, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.08);
+    osc.connect(g);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.08);
+  } catch(e){}
+}
+
+function sfxRevealNumber(n){
+  if(n < 1 || n > 8) return;
+  try {
+    var ac = getAC();
+    var ctx = ac;
+    // Frequencies from C4 to C5, 8 notes for 1-8
+    var freqs = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25];
+    var freq = freqs[n - 1];
+    var g = ctx.createGain();
+    g.gain.setValueAtTime(0.18, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+    g.connect(ctx.destination);
+    var osc = ctx.createOscillator();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    osc.connect(g);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.15);
+  } catch(e){}
+}
+
+function sfxFlag(){
+  try {
+    var ac = getAC();
+    var ctx = ac;
+    var g = ctx.createGain();
+    g.gain.setValueAtTime(0.15, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+    g.connect(ctx.destination);
+    [880, 1100].forEach(function(freq, i){
+      var osc = ctx.createOscillator();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.04);
+      osc.connect(g);
+      osc.start(ctx.currentTime + i * 0.04);
+      osc.stop(ctx.currentTime + 0.12);
+    });
+  } catch(e){}
+}
+
+function sfxMine(){
+  try {
+    var ac = getAC();
+    var ctx = ac;
+    // Noise
+    var bufLen = ctx.sampleRate * 0.4;
+    var buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+    var data = buf.getChannelData(0);
+    for(var i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
+    var noise = ctx.createBufferSource();
+    noise.buffer = buf;
+    var ng = ctx.createGain();
+    ng.gain.setValueAtTime(0.5, ctx.currentTime);
+    ng.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+    noise.connect(ng);
+    ng.connect(ctx.destination);
+    noise.start(ctx.currentTime);
+    // Low boom oscillator
+    var g = ctx.createGain();
+    g.gain.setValueAtTime(0.45, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+    g.connect(ctx.destination);
+    var osc = ctx.createOscillator();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(150, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.35);
+    osc.connect(g);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.4);
+  } catch(e){}
+}
+
+function sfxVictory(){
+  try {
+    var ac = getAC();
+    var ctx = ac;
+    // Ascending scale: C4-E4-G4-C5-E5-G5
+    var notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99];
+    notes.forEach(function(freq, i){
+      var t = ctx.currentTime + i * 0.1;
+      var g = ctx.createGain();
+      g.gain.setValueAtTime(0.2, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+      g.connect(ctx.destination);
+      var osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, t);
+      osc.connect(g);
+      osc.start(t);
+      osc.stop(t + 0.35);
+    });
+  } catch(e){}
+}
+
+// ========== GAME LOGIC ==========
 function init(){
   var d=DIFFS[diff];rows=d.rows;cols=d.cols;mineTotal=d.mines;
   grid=[];revealed=[];flagged=[];
@@ -87,7 +244,9 @@ function init(){
   document.getElementById('mineCount').textContent=mineTotal;
   document.getElementById('result').style.display='none';
   document.getElementById('flagBtn').classList.remove('active');
-  // load best
+  document.getElementById('mFlagBtn').classList.remove('active');
+  document.getElementById('mRevealBtn').classList.add('primary');
+  document.getElementById('mRevealBtn').classList.remove('active');
   var b=localStorage.getItem('msBest_'+DIFFS[diff].name);
   document.getElementById('best').textContent=b||'-';
   renderBoard();
@@ -101,7 +260,6 @@ function placeMines(sr,sc){
     if(grid[r][c]===-1)continue;
     grid[r][c]=-1;placed++;
   }
-  // calc numbers
   for(var r=0;r<rows;r++)for(var c=0;c<cols;c++){
     if(grid[r][c]===-1)continue;
     var cnt=0;
@@ -123,10 +281,10 @@ function renderBoard(){
     cell.dataset.r=r;cell.dataset.c=c;
     cell.addEventListener('click',onLeft);
     cell.addEventListener('contextmenu',onRight);
-    // touch long press for flag
     var lpt=null;
     cell.addEventListener('touchstart',function(e){
-      var t=this;lpt=setTimeout(function(){flagCell(+t.dataset.r,+t.dataset.c);lpt=null;},400);
+      var t=this;
+      lpt=setTimeout(function(){flagCell(+t.dataset.r,+t.dataset.c);lpt=null;},400);
     });
     cell.addEventListener('touchend',function(){if(lpt){clearTimeout(lpt);lpt=null;}});
     cell.addEventListener('touchmove',function(){if(lpt){clearTimeout(lpt);lpt=null;}});
@@ -159,6 +317,7 @@ function flagCell(r,c){
   cell.classList.toggle('flagged',flagged[r][c]);
   cell.textContent=flagged[r][c]?'🚩':'';
   document.getElementById('flagCount').textContent=document.querySelectorAll('.cell.flagged').length;
+  if(flagged[r][c]) sfxFlag();
 }
 
 function revealCell(r,c){
@@ -169,13 +328,15 @@ function revealCell(r,c){
   cell.classList.add('revealed');
   if(grid[r][c]===-1){
     cell.classList.add('boom');cell.textContent='💣';
+    sfxMine();
     endGame(false);return;
   }
   if(grid[r][c]>0){
     cell.textContent=grid[r][c];
     cell.classList.add('n'+grid[r][c]);
+    sfxRevealNumber(grid[r][c]);
   }else{
-    // flood fill
+    sfxRevealEmpty();
     for(var dr=-1;dr<=1;dr++)for(var dc=-1;dc<=1;dc++){
       if(dr===0&&dc===0)continue;
       revealCell(r+dr,c+dc);
@@ -208,7 +369,6 @@ function endGame(won){
   gameOver=true;gameWon=won;
   if(timerRef)clearInterval(timerRef);
   if(!won){
-    // reveal all mines
     for(var r=0;r<rows;r++)for(var c=0;c<cols;c++){
       if(grid[r][c]===-1&&!revealed[r][c]){
         var cell=getCell(r,c);
@@ -218,12 +378,11 @@ function endGame(won){
       }
     }
   }else{
-    // flag all mines
+    sfxVictory();
     for(var r=0;r<rows;r++)for(var c=0;c<cols;c++){
       if(grid[r][c]===-1&&!flagged[r][c]){flagged[r][c]=true;var cell=getCell(r,c);cell.classList.add('flagged');cell.textContent='🚩';}
     }
     document.getElementById('flagCount').textContent=mineTotal;
-    // save best
     var key='msBest_'+DIFFS[diff].name;
     var prev=parseInt(localStorage.getItem(key));
     if(!prev||timerVal<prev){localStorage.setItem(key,timerVal);document.getElementById('best').textContent=timerVal;}
@@ -249,14 +408,60 @@ function newGame(){init();}
 function toggleFlagMode(){
   flagMode=!flagMode;
   document.getElementById('flagBtn').classList.toggle('active',flagMode);
+  document.getElementById('mFlagBtn').classList.toggle('active',flagMode);
+  document.getElementById('mRevealBtn').classList.toggle('primary',!flagMode);
 }
+
+// Mobile: touch handler for bottom bar buttons
+window._mTouch = function(e, mode){
+  e.preventDefault();
+  if(mode === 'reveal'){
+    flagMode = false;
+    document.getElementById('flagBtn').classList.remove('active');
+    document.getElementById('mFlagBtn').classList.remove('active');
+    document.getElementById('mRevealBtn').classList.add('primary');
+    document.getElementById('mRevealBtn').classList.remove('active');
+  } else if(mode === 'flag'){
+    flagMode = true;
+    document.getElementById('flagBtn').classList.add('active');
+    document.getElementById('mFlagBtn').classList.add('active');
+    document.getElementById('mRevealBtn').classList.remove('primary');
+    document.getElementById('mRevealBtn').classList.add('active');
+  }
+};
+
+window._mRevealTap = function(){
+  var now = Date.now();
+  if(now - lastMTouchTime < 300) return;
+  lastMTouchTime = now;
+  flagMode = false;
+  document.getElementById('flagBtn').classList.remove('active');
+  document.getElementById('mFlagBtn').classList.remove('active');
+  document.getElementById('mRevealBtn').classList.add('primary');
+  document.getElementById('mRevealBtn').classList.remove('active');
+};
+
+window._mFlagTap = function(){
+  var now = Date.now();
+  if(now - lastMTouchTime < 300) return;
+  lastMTouchTime = now;
+  flagMode = !flagMode;
+  document.getElementById('flagBtn').classList.toggle('active',flagMode);
+  document.getElementById('mFlagBtn').classList.toggle('active',flagMode);
+  if(flagMode){
+    document.getElementById('mRevealBtn').classList.remove('primary');
+    document.getElementById('mRevealBtn').classList.add('active');
+  } else {
+    document.getElementById('mRevealBtn').classList.add('primary');
+    document.getElementById('mRevealBtn').classList.remove('active');
+  }
+};
 
 document.addEventListener('keydown',function(e){
   if(e.key==='f'||e.key==='F')toggleFlagMode();
   if(e.key==='r'||e.key==='R')newGame();
 });
 
-// chord: double click or middle click on revealed number
 document.getElementById('board').addEventListener('dblclick',function(e){
   var cell=e.target.closest('.cell');
   if(!cell)return;
