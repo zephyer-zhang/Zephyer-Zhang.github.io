@@ -322,3 +322,46 @@ window.addEventListener('load', function() {
 
 console.log('%c Zephyr 的个人网站 ', 'background: #00ff41; color: #0a0a0a; font-size: 18px; font-weight: bold; padding: 4px 8px; border-radius: 4px;');
 console.log('%c「用代码写诗，用AI作画」', 'color: #0099ff; font-size: 13px;');
+
+// ============ 弹窗功能 ============
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'flex';
+        setTimeout(() => {
+            modal.classList.add('active');
+        }, 10);
+        document.body.style.overflow = 'hidden'; // 防止背景滚动
+    }
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('active');
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300);
+        document.body.style.overflow = 'auto'; // 恢复背景滚动
+    }
+}
+
+// 点击弹窗背景关闭弹窗
+window.addEventListener('click', function(event) {
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => {
+        if (event.target === modal) {
+            closeModal(modal.id);
+        }
+    });
+});
+
+// ESC键关闭弹窗
+window.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        const activeModal = document.querySelector('.modal.active');
+        if (activeModal) {
+            closeModal(activeModal.id);
+        }
+    }
+});
