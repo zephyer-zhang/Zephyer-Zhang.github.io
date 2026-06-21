@@ -5,239 +5,193 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>消消乐 · 暗黑科技</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+  * { margin:0; padding:0; box-sizing:border-box; user-select:none; }
   body {
-    background: #08080f;
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
+    background:#08080f;
+    font-family:'Segoe UI',system-ui,sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
   }
   .game-container {
-    background: linear-gradient(145deg, #0d0d1a, #12121f);
-    border-radius: 20px;
-    padding: 20px;
-    border: 1px solid rgba(0,200,255,0.15);
-    box-shadow: 0 0 40px rgba(0,150,255,0.1), inset 0 0 60px rgba(0,100,255,0.03);
-    position: relative;
+    background:linear-gradient(145deg,#0d0d1a,#12121f);
+    border-radius:20px;
+    padding:20px;
+    border:1px solid rgba(0,200,255,0.15);
+    box-shadow:0 0 40px rgba(0,150,255,0.1), inset 0 0 60px rgba(0,100,255,0.03);
+    position:relative;
   }
   .game-container::before {
-    content: '';
-    position: absolute;
-    top: -1px; left: 30%; right: 30%;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, #00c8ff, transparent);
-    border-radius: 50%;
+    content:'';
+    position:absolute;
+    top:-1px; left:30%; right:30%;
+    height:2px;
+    background:linear-gradient(90deg,transparent,#00c8ff,transparent);
+    border-radius:50%;
   }
-
   .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 5px 15px 5px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 5px 15px 5px;
   }
   .title {
-    color: #00c8ff;
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing: 3px;
-    text-shadow: 0 0 15px rgba(0,200,255,0.4);
+    color:#00c8ff;
+    font-size:22px;
+    font-weight:700;
+    letter-spacing:3px;
+    text-shadow:0 0 15px rgba(0,200,255,0.4);
   }
   .score-area {
-    display: flex;
-    gap: 20px;
-    align-items: center;
+    display:flex;
+    gap:20px;
+    align-items:center;
   }
-  .score-box {
-    text-align: right;
-  }
+  .score-box { text-align:right; }
   .score-label {
-    color: rgba(255,255,255,0.4);
-    font-size: 11px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
+    color:rgba(255,255,255,0.4);
+    font-size:11px;
+    letter-spacing:1px;
+    text-transform:uppercase;
   }
   .score-value {
-    color: #fff;
-    font-size: 24px;
-    font-weight: 700;
-    text-shadow: 0 0 10px rgba(0,200,255,0.3);
+    color:#fff;
+    font-size:24px;
+    font-weight:700;
+    text-shadow:0 0 10px rgba(0,200,255,0.3);
   }
   .combo-display {
-    position: absolute;
-    top: 65px;
-    right: 25px;
-    color: #ff6b35;
-    font-size: 28px;
-    font-weight: 900;
-    text-shadow: 0 0 20px rgba(255,107,53,0.7);
-    opacity: 0;
-    transition: opacity 0.3s, transform 0.3s;
-    transform: scale(0.5);
-    pointer-events: none;
-    z-index: 10;
+    position:absolute;
+    top:65px; right:25px;
+    color:#ff6b35;
+    font-size:28px;
+    font-weight:900;
+    text-shadow:0 0 20px rgba(255,107,53,0.7);
+    opacity:0;
+    transition:opacity 0.3s, transform 0.3s;
+    transform:scale(0.5);
+    pointer-events:none;
+    z-index:10;
   }
-  .combo-display.show {
-    opacity: 1;
-    transform: scale(1);
-  }
+  .combo-display.show { opacity:1; transform:scale(1); }
 
   #board {
-    display: grid;
-    gap: 3px;
-    padding: 8px;
-    background: rgba(255,255,255,0.03);
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.05);
-    position: relative;
+    display:grid;
+    gap:3px;
+    padding:8px;
+    background:rgba(255,255,255,0.03);
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,0.05);
+    position:relative;
   }
-
   .cell {
-    width: 52px;
-    height: 52px;
-    border-radius: 10px;
-    cursor: pointer;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 26px;
-    transition: transform 0.12s, box-shadow 0.12s;
+    width:52px; height:52px;
+    border-radius:10px;
+    cursor:pointer;
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:26px;
+    transition:transform 0.12s, box-shadow 0.12s;
   }
-  .cell:active { transform: scale(0.92); }
-
+  .cell:active { transform:scale(0.92); }
   .gem {
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    font-weight: bold;
-    transition: all 0.15s;
-    cursor: pointer;
+    width:44px; height:44px;
+    border-radius:10px;
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+    font-weight:bold;
+    transition:all 0.15s;
+    cursor:pointer;
   }
-
-  /* Gem colors - cyber/neon theme */
-  .gem-0 { /* Cyan */
-    background: linear-gradient(135deg, #00d4ff, #0098cc);
-    box-shadow: 0 0 12px rgba(0,212,255,0.4), inset 0 0 15px rgba(255,255,255,0.15);
-    color: #e0f8ff;
-  }
-  .gem-1 { /* Magenta */
-    background: linear-gradient(135deg, #ff44dd, #cc22aa);
-    box-shadow: 0 0 12px rgba(255,68,221,0.4), inset 0 0 15px rgba(255,255,255,0.15);
-    color: #ffe0f8;
-  }
-  .gem-2 { /* Lime */
-    background: linear-gradient(135deg, #44ff88, #22cc66);
-    box-shadow: 0 0 12px rgba(68,255,136,0.4), inset 0 0 15px rgba(255,255,255,0.15);
-    color: #e0ffe8;
-  }
-  .gem-3 { /* Orange */
-    background: linear-gradient(135deg, #ff8833, #dd6611);
-    box-shadow: 0 0 12px rgba(255,136,51,0.4), inset 0 0 15px rgba(255,255,255,0.15);
-    color: #fff0e0;
-  }
-  .gem-4 { /* Purple */
-    background: linear-gradient(135deg, #aa55ff, #7733cc);
-    box-shadow: 0 0 12px rgba(170,85,255,0.4), inset 0 0 15px rgba(255,255,255,0.15);
-    color: #eee0ff;
-  }
-  .gem-5 { /* Gold */
-    background: linear-gradient(135deg, #ffdd44, #ccaa22);
-    box-shadow: 0 0 12px rgba(255,221,68,0.4), inset 0 0 15px rgba(255,255,255,0.15);
-    color: #fff8e0;
-  }
-
+  .gem-0 { background:linear-gradient(135deg,#00d4ff,#0098cc); box-shadow:0 0 12px rgba(0,212,255,0.4),inset 0 0 15px rgba(255,255,255,0.15); color:#e0f8ff; }
+  .gem-1 { background:linear-gradient(135deg,#ff44dd,#cc22aa); box-shadow:0 0 12px rgba(255,68,221,0.4),inset 0 0 15px rgba(255,255,255,0.15); color:#ffe0f8; }
+  .gem-2 { background:linear-gradient(135deg,#44ff88,#22cc66); box-shadow:0 0 12px rgba(68,255,136,0.4),inset 0 0 15px rgba(255,255,255,0.15); color:#e0ffe8; }
+  .gem-3 { background:linear-gradient(135deg,#ff8833,#dd6611); box-shadow:0 0 12px rgba(255,136,51,0.4),inset 0 0 15px rgba(255,255,255,0.15); color:#fff0e0; }
+  .gem-4 { background:linear-gradient(135deg,#aa55ff,#7733cc); box-shadow:0 0 12px rgba(170,85,255,0.4),inset 0 0 15px rgba(255,255,255,0.15); color:#eee0ff; }
+  .gem-5 { background:linear-gradient(135deg,#ffdd44,#ccaa22); box-shadow:0 0 12px rgba(255,221,68,0.4),inset 0 0 15px rgba(255,255,255,0.15); color:#fff8e0; }
   .cell.selected .gem {
-    transform: scale(1.15);
-    box-shadow: 0 0 25px currentColor, 0 0 50px currentColor !important;
-    border: 2px solid #fff;
-  }
-
-  .gem.dropping {
-    animation: dropIn 0.25s ease-out;
+    transform:scale(1.15);
+    box-shadow:0 0 25px currentColor,0 0 50px currentColor !important;
+    border:2px solid #fff;
   }
   @keyframes dropIn {
-    0% { transform: translateY(-60px); opacity: 0.5; }
-    60% { transform: translateY(4px); }
-    100% { transform: translateY(0); opacity: 1; }
+    0% { transform:translateY(-60px); opacity:0.5; }
+    60% { transform:translateY(4px); }
+    100% { transform:translateY(0); opacity:1; }
   }
 
-  /* Particle canvas overlay */
   #particles {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: 5;
-    border-radius: 12px;
+    position:absolute;
+    top:0; left:0;
+    width:100%; height:100%;
+    pointer-events:none;
+    z-index:5;
+    border-radius:12px;
   }
 
-  /* Bottom controls */
   .controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 15px;
-    gap: 10px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding-top:15px;
+    gap:10px;
   }
   .hint-area {
-    color: rgba(255,255,255,0.3);
-    font-size: 13px;
-    letter-spacing: 0.5px;
+    color:rgba(255,255,255,0.3);
+    font-size:13px;
+    letter-spacing:0.5px;
   }
   .btn {
-    background: rgba(0,200,255,0.1);
-    border: 1px solid rgba(0,200,255,0.25);
-    color: #00c8ff;
-    padding: 8px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 13px;
-    transition: all 0.2s;
-    letter-spacing: 1px;
+    background:rgba(0,200,255,0.1);
+    border:1px solid rgba(0,200,255,0.25);
+    color:#00c8ff;
+    padding:8px 20px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:13px;
+    transition:all 0.2s;
+    letter-spacing:1px;
   }
   .btn:hover {
-    background: rgba(0,200,255,0.2);
-    box-shadow: 0 0 15px rgba(0,200,255,0.2);
+    background:rgba(0,200,255,0.2);
+    box-shadow:0 0 15px rgba(0,200,255,0.2);
   }
-  .btn:active { transform: scale(0.95); }
+  .btn:active { transform:scale(0.95); }
+  .btn.muted { opacity:0.4; }
 
-  /* Footer back link */
   .footer {
-    text-align: center;
-    padding-top: 12px;
+    text-align:center;
+    padding-top:12px;
   }
   .footer a {
-    color: rgba(255,255,255,0.2);
-    font-size: 12px;
-    text-decoration: none;
-    letter-spacing: 1px;
+    color:rgba(255,255,255,0.2);
+    font-size:12px;
+    text-decoration:none;
+    letter-spacing:1px;
   }
-  .footer a:hover { color: rgba(0,200,255,0.5); }
+  .footer a:hover { color:rgba(0,200,255,0.5); }
 
-  /* Responsive */
-  @media (max-width: 500px) {
-    .game-container { padding: 12px; border-radius: 14px; }
-    .cell { width: 38px; height: 38px; }
-    .gem { width: 32px; height: 32px; font-size: 16px; border-radius: 7px; }
-    #board { gap: 2px; padding: 5px; }
-    .title { font-size: 17px; }
-    .score-value { font-size: 18px; }
-    .score-box { text-align: center; }
+  @media (max-width:500px) {
+    .game-container { padding:12px; border-radius:14px; }
+    .cell { width:38px; height:38px; }
+    .gem { width:32px; height:32px; font-size:16px; border-radius:7px; }
+    #board { gap:2px; padding:5px; }
+    .title { font-size:17px; }
+    .score-value { font-size:18px; }
   }
-  @media (max-width: 370px) {
-    .cell { width: 32px; height: 32px; }
-    .gem { width: 27px; height: 27px; font-size: 13px; }
-    #board { gap: 2px; padding: 4px; }
-    .title { font-size: 14px; }
-    .score-value { font-size: 15px; }
+  @media (max-width:370px) {
+    .cell { width:32px; height:32px; }
+    .gem { width:27px; height:27px; font-size:13px; }
+    #board { gap:2px; padding:4px; }
+    .title { font-size:14px; }
+    .score-value { font-size:15px; }
   }
 </style>
 </head>
@@ -251,6 +205,7 @@
         <div class="score-label">分数</div>
         <div class="score-value" id="score">0</div>
       </div>
+      <button class="btn" id="muteBtn" title="音效开关">🔊</button>
     </div>
   </div>
 
@@ -271,20 +226,93 @@
 </div>
 
 <script>
+// ===== SOUND SYSTEM (Web Audio API) =====
+let audioCtx = null;
+let soundEnabled = true;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function playTone(freq, duration, type='sine', volume=0.15) {
+  if (!soundEnabled) return;
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    gain.gain.setValueAtTime(volume, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + duration);
+  } catch(e) {}
+}
+
+function playSwap() {
+  // 清脆的"咔"声
+  playTone(800, 0.08, 'square', 0.10);
+  setTimeout(() => playTone(1000, 0.06, 'square', 0.08), 50);
+}
+
+function playMatch() {
+  // 上升音调的消除音
+  playTone(523, 0.12, 'sine', 0.15);
+  setTimeout(() => playTone(659, 0.12, 'sine', 0.15), 80);
+  setTimeout(() => playTone(784, 0.15, 'sine', 0.12), 160);
+}
+
+function playCombo() {
+  // 华丽的连击音
+  const notes = [784, 988, 1175, 1318];
+  notes.forEach((n, i) => {
+    setTimeout(() => playTone(n, 0.18, 'sine', 0.13), i * 70);
+  });
+}
+
+function playDrop() {
+  // 轻柔的"嗒"声
+  playTone(220, 0.06, 'triangle', 0.08);
+}
+
+function playInvalid() {
+  // 低沉的"嗡"声
+  playTone(150, 0.2, 'sawtooth', 0.10);
+  setTimeout(() => playTone(120, 0.25, 'sawtooth', 0.08), 100);
+}
+
+function playShuffle() {
+  // 快速的滑动音
+  for (let i = 0; i < 5; i++) {
+    setTimeout(() => playTone(400 + i * 100, 0.08, 'sine', 0.10), i * 40);
+  }
+}
+
+// Mute button
+const muteBtn = document.getElementById('muteBtn');
+muteBtn.addEventListener('click', () => {
+  soundEnabled = !soundEnabled;
+  muteBtn.textContent = soundEnabled ? '🔊' : '🔇';
+  muteBtn.classList.toggle('muted', !soundEnabled);
+  if (soundEnabled) playTone(660, 0.1, 'sine', 0.10);
+});
+
 // ===== CONFIG =====
 const ROWS = 8;
 const COLS = 8;
 const GEM_TYPES = 6;
-const ANIMATION_SPEED = 180; // ms per step
+const ANIMATION_SPEED = 180;
 
-// ===== STATE =====
 let grid = [];
 let score = 0;
-let selected = null; // { row, col }
+let selected = null;
 let isAnimating = false;
 let comboCount = 0;
 
-// ===== DOM =====
 const boardEl = document.getElementById('board');
 const scoreEl = document.getElementById('score');
 const comboDisplay = document.getElementById('comboDisplay');
@@ -292,7 +320,6 @@ const hintEl = document.getElementById('hint');
 const canvas = document.getElementById('particles');
 const ctx = canvas.getContext('2d');
 
-// ===== INIT =====
 function createEmptyGrid() {
   return Array.from({ length: ROWS }, () => Array(COLS).fill(0));
 }
@@ -322,7 +349,6 @@ function generateGrid() {
       grid[r][c] = randomGem();
     }
   }
-  // Remove initial matches by regeneration
   while (hasMatch(grid)) {
     const matches = findAllMatches(grid);
     for (const m of matches) {
@@ -333,7 +359,6 @@ function generateGrid() {
 
 function findAllMatches(g) {
   const matched = new Set();
-  // Horizontal
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS - 2; c++) {
       if (g[r][c] !== -1 && g[r][c] === g[r][c+1] && g[r][c] === g[r][c+2]) {
@@ -343,7 +368,6 @@ function findAllMatches(g) {
       }
     }
   }
-  // Vertical
   for (let c = 0; c < COLS; c++) {
     for (let r = 0; r < ROWS - 2; r++) {
       if (g[r][c] !== -1 && g[r][c] === g[r+1][c] && g[r][c] === g[r+2][c]) {
@@ -359,7 +383,6 @@ function findAllMatches(g) {
   });
 }
 
-// ===== SWAP =====
 function isValidSwap(r1, c1, r2, c2) {
   return (Math.abs(r1 - r2) + Math.abs(c1 - c2)) === 1;
 }
@@ -370,7 +393,6 @@ function swapGems(r1, c1, r2, c2) {
   grid[r2][c2] = tmp;
 }
 
-// ===== GRAVITY & FILL =====
 function applyGravity(g) {
   const moved = [];
   for (let c = 0; c < COLS; c++) {
@@ -385,7 +407,6 @@ function applyGravity(g) {
         writeRow--;
       }
     }
-    // Fill empty cells from top
     for (let r = writeRow; r >= 0; r--) {
       g[r][c] = randomGem();
       moved.push({ fromR: r - (writeRow + 1), toR: r, c, isNew: true });
@@ -394,17 +415,13 @@ function applyGravity(g) {
   return moved;
 }
 
-// ===== SCORING =====
 function calculateScore(matchCount, combo) {
   const base = matchCount >= 4 ? matchCount * 20 : matchCount * 10;
   const multiplier = combo >= 0 ? Math.pow(2, combo) : 1;
   return Math.floor(base * multiplier);
 }
 
-// ===== RENDER =====
-let gemSymbols = ['●', '◆', '★', '▲', '♦', '⬟'];
-// Replace with better symbols
-gemSymbols = ['●', '◆', '★', '▲', '⬟', '✦'];
+const gemSymbols = ['●', '◆', '★', '▲', '⬟', '✦'];
 
 function render() {
   boardEl.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
@@ -415,7 +432,6 @@ function render() {
       cell.className = 'cell';
       cell.dataset.row = r;
       cell.dataset.col = c;
-
       const gem = document.createElement('div');
       gem.className = 'gem';
       const val = grid[r][c];
@@ -426,24 +442,22 @@ function render() {
         gem.style.visibility = 'hidden';
       }
       cell.appendChild(gem);
-
       if (selected && selected.r === r && selected.c === c) {
         cell.classList.add('selected');
       }
-
       cell.addEventListener('click', () => onCellClick(r, c));
-      // Touch support
       cell.addEventListener('touchstart', (e) => { e.preventDefault(); onCellClick(r, c); }, { passive: false });
-
       boardEl.appendChild(cell);
     }
   }
   scoreEl.textContent = score;
 }
 
-// ===== PLAYER INPUT =====
 function onCellClick(row, col) {
   if (isAnimating) return;
+
+  // First click — init audio context (browser autoplay policy)
+  getAudioCtx();
 
   if (!selected) {
     selected = { r: row, c: col };
@@ -452,17 +466,13 @@ function onCellClick(row, col) {
     return;
   }
 
-  // Clicking same cell — deselect
   if (selected.r === row && selected.c === col) {
     selected = null;
     render();
-    hintEl.textContent = '点击方块选中';
     return;
   }
 
-  // Check adjacency
   if (!isValidSwap(selected.r, selected.c, row, col)) {
-    // Select the new cell instead
     selected = { r: row, c: col };
     render();
     return;
@@ -471,32 +481,28 @@ function onCellClick(row, col) {
   const sr = selected.r, sc = selected.c;
   selected = null;
 
-  // Try swap
   swapGems(sr, sc, row, col);
-
-  // Check if swap produces a match
   const matches = findAllMatches(grid);
+
   if (matches.length === 0) {
-    // Invalid swap — swap back
-    swapGems(sr, sc, row, col);
+    swapGems(sr, sc, row, col); // swap back
+    playInvalid();
     render();
     hintEl.textContent = '❌ 无法消除，再试试';
-    setTimeout(() => {
-      hintEl.textContent = '点击相邻方块交换';
-    }, 1000);
+    setTimeout(() => { hintEl.textContent = '点击相邻方块交换'; }, 1000);
     return;
   }
 
+  playSwap();
+  setTimeout(() => playMatch(), 150);
   isAnimating = true;
   hintEl.textContent = '消除中...';
   comboCount = 0;
   processMatches(matches);
 }
 
-// ===== MATCH PROCESSING =====
 async function processMatches(matches) {
   while (matches.length > 0) {
-    // Calculate score
     for (const m of matches) {
       grid[m.r][m.c] = -1;
     }
@@ -504,35 +510,31 @@ async function processMatches(matches) {
     const pts = calculateScore(matches.length, comboCount - 1);
     score += pts;
 
-    // Show combo
     if (comboCount >= 2) {
       showCombo(comboCount, pts);
-    }
-
-    render();
-    await sleep(ANIMATION_SPEED);
-
-    // Spawn particles at matched positions
-    spawnParticles(matches);
-
-    // Gravity + fill
-    const moved = applyGravity(grid);
-    render();
-    await sleep(ANIMATION_SPEED);
-
-    // Check for new matches
-    const newMatches = findAllMatches(grid);
-    if (newMatches.length > 0) {
-      matches = newMatches;
+      playCombo();
     } else {
-      matches = [];
+      playMatch();
     }
+
+    render();
+    await sleep(ANIMATION_SPEED);
+    spawnParticles(matches);
+    await sleep(ANIMATION_SPEED);
+
+    const moved = applyGravity(grid);
+    if (moved.some(m => m.isNew)) playDrop();
+    render();
+    await sleep(ANIMATION_SPEED);
+
+    const newMatches = findAllMatches(grid);
+    matches = newMatches.length > 0 ? newMatches : [];
   }
 
-  // Check if there are valid moves
   isAnimating = false;
   if (!hasValidMoves()) {
     hintEl.textContent = '⚠️ 没有可消除的步，自动重排...';
+    playShuffle();
     await sleep(800);
     shuffleBoard();
   } else {
@@ -543,13 +545,11 @@ async function processMatches(matches) {
 function hasValidMoves() {
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
-      // Try swap right
       if (c + 1 < COLS) {
         swapGems(r, c, r, c+1);
         if (findAllMatches(grid).length > 0) { swapGems(r, c, r, c+1); return true; }
         swapGems(r, c, r, c+1);
       }
-      // Try swap down
       if (r + 1 < ROWS) {
         swapGems(r, c, r+1, c);
         if (findAllMatches(grid).length > 0) { swapGems(r, c, r+1, c); return true; }
@@ -561,26 +561,22 @@ function hasValidMoves() {
 }
 
 function shuffleBoard() {
-  // Collect all gem values
   const values = [];
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       values.push(grid[r][c]);
     }
   }
-  // Shuffle
   for (let i = values.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [values[i], values[j]] = [values[j], values[i]];
   }
-  // Put back
   let idx = 0;
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       grid[r][c] = values[idx++];
     }
   }
-  // If there are matches or no valid moves, regenerate
   if (hasMatch(grid) || !hasValidMoves()) {
     generateGrid();
   }
@@ -589,13 +585,10 @@ function shuffleBoard() {
   setTimeout(() => { hintEl.textContent = '点击相邻方块交换'; }, 1000);
 }
 
-// ===== UI HELPERS =====
 function showCombo(count, pts) {
   comboDisplay.textContent = `🔥 ${count}x COMBO! +${pts}`;
   comboDisplay.className = 'combo-display show';
-  setTimeout(() => {
-    comboDisplay.className = 'combo-display';
-  }, 800);
+  setTimeout(() => { comboDisplay.className = 'combo-display'; }, 800);
 }
 
 function sleep(ms) {
@@ -607,8 +600,7 @@ function spawnParticles(matches) {
   const rect = boardEl.getBoundingClientRect();
   canvas.width = boardEl.offsetWidth;
   canvas.height = boardEl.offsetHeight;
-
-  const colors = ['#00d4ff', '#ff44dd', '#44ff88', '#ff8833', '#aa55ff', '#ffdd44'];
+  const colors = ['#00d4ff','#ff44dd','#44ff88','#ff8833','#aa55ff','#ffdd44'];
   const particles = [];
 
   for (const m of matches) {
@@ -619,7 +611,6 @@ function spawnParticles(matches) {
       const cx = cellRect.left - rect.left + cellRect.width / 2;
       const cy = cellRect.top - rect.top + cellRect.height / 2;
       const color = colors[grid[m.r]?.[m.c] >= 0 ? grid[m.r][m.c] : 0] || '#00d4ff';
-
       for (let i = 0; i < 6; i++) {
         const angle = Math.random() * Math.PI * 2;
         const speed = 2 + Math.random() * 4;
@@ -627,9 +618,7 @@ function spawnParticles(matches) {
           x: cx, y: cy,
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed - 2,
-          life: 1,
-          size: 2 + Math.random() * 3,
-          color
+          life: 1, size: 2 + Math.random() * 3, color
         });
       }
     }
@@ -642,10 +631,7 @@ function spawnParticles(matches) {
     let alive = false;
     for (const p of particles) {
       if (p.life <= 0) continue;
-      p.x += p.vx;
-      p.y += p.vy;
-      p.vy += 0.1;
-      p.life -= 0.025;
+      p.x += p.vx; p.y += p.vy; p.vy += 0.1; p.life -= 0.025;
       if (p.life <= 0) continue;
       alive = true;
       ctx.globalAlpha = p.life;
@@ -661,17 +647,15 @@ function spawnParticles(matches) {
     if (alive) requestAnimationFrame(animateParticles);
     else ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
-
   animateParticles();
 }
 
-// ===== SHUFFLE BUTTON =====
 document.getElementById('shuffleBtn').addEventListener('click', () => {
   if (isAnimating) return;
+  playShuffle();
   shuffleBoard();
 });
 
-// ===== START =====
 generateGrid();
 render();
 </script>
