@@ -1182,3 +1182,9 @@ footer p {
         font-size: 22px;
     }
 }
+
+/* 留言板 */
+.giscus-container {
+    margin-top: 30px;
+    min-height: 300px;
+}
